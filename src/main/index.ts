@@ -1,74 +1,121 @@
-import { join } from 'node:path'
-import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
-import icon from '../../resources/icon.png?asset'
+import { randomUUID } from 'node:crypto'
+import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { basename, extname, isAbsolute, join, relative, resolve } from 'node:path'
+import { is } from '@electron-toolkit/utils'
+import { app, BrowserWindow, dialog, ipcMain } from 'electron'
+import type { Data } from '../preload/types'
 
+let folder: string
+const config = () => join(app.getPath('userData'), 'treasury-storage.json')
+async function save(data: Data): Promise<void> {
+  await mkdir(folder, { recursive: true })
+  const target = join(folder, 'treasury.json')
+  await writeFile(`${target}.tmp`, JSON.stringify(data, null, 2))
+  const { rename } = await import('node:fs/promises')
+  await rename(`${target}.tmp`, target)
+}
 function createWindow(): void {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
-    show: false,
+  const win = new BrowserWindow({
+    width: 1500,
+    height: 940,
+    minWidth: 600,
+    minHeight: 600,
+    backgroundColor: '#0e1b2a',
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+    webPreferences: { preload: join(__dirname, '../preload/index.js'), sandbox: false }
+  })
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
+  if (is.dev && process.env.ELECTRON_RENDERER_URL) win.loadURL(process.env.ELECTRON_RENDERER_URL)
+  else win.loadFile(join(__dirname, '../renderer/index.html'))
+}
+app.whenReady().then(async () => {
+  folder = join(app.getPath('userData'), 'Treasury')
+  try {
+    folder = JSON.parse(await readFile(config(), 'utf8')).folder
+  } catch {}
+  ipcMain.handle('treasury:load', async () => {
+    await mkdir(folder, { recursive: true })
+    try {
+      return { data: JSON.parse(await readFile(join(folder, 'treasury.json'), 'utf8')), folder }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+      return { data: null, folder }
     }
   })
-
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+  ipcMain.handle('treasury:save', (_, data: Data) => save(data))
+  ipcMain.handle('treasury:folder', async () => {
+    const choice = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'] })
+    if (choice.canceled) return null
+    const next = choice.filePaths[0]
+    if (resolve(next) === resolve(folder)) return folder
+    const child = relative(folder, next)
+    if (!child.startsWith('..') && !isAbsolute(child))
+      throw new Error('Choose a folder outside the current workspace.')
+    if ((await readdir(next)).length)
+      throw new Error('Choose an empty folder so existing files stay untouched.')
+    const { cp } = await import('node:fs/promises')
+    await mkdir(next, { recursive: true })
+    await cp(folder, next, { recursive: true })
+    await writeFile(config(), JSON.stringify({ folder: next }))
+    folder = next
+    return folder
   })
-
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
+  ipcMain.handle('treasury:import', async () => {
+    const choice = await dialog.showOpenDialog({
+      properties: ['openFile', 'multiSelections'],
+      filters: [{ name: 'Receipt images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }]
+    })
+    if (choice.canceled) return []
+    await mkdir(join(folder, 'receipts'), { recursive: true })
+    return Promise.all(
+      choice.filePaths.map(async (source) => {
+        const file = join('receipts', randomUUID() + extname(source).toLowerCase())
+        await copyFile(source, join(folder, file))
+        return { name: basename(source), file }
+      })
+    )
   })
-
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env.ELECTRON_RENDERER_URL) {
-    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-}
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
-
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
+  ipcMain.handle('treasury:read', async (_, file: string) => {
+    const path = resolve(folder, file)
+    const within = relative(join(folder, 'receipts'), path)
+    if (within.startsWith('..') || isAbsolute(within) || !within)
+      throw new Error('Invalid receipt path')
+    const mime =
+      extname(file).toLowerCase() === '.png'
+        ? 'image/png'
+        : extname(file).toLowerCase() === '.webp'
+          ? 'image/webp'
+          : 'image/jpeg'
+    return `data:${mime};base64,${(await readFile(path)).toString('base64')}`
   })
-
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
-
+  ipcMain.handle('treasury:pdf', async (_, html: string, name: string) => {
+    const choice = await dialog.showSaveDialog({
+      defaultPath: `${name}.pdf`,
+      filters: [{ name: 'PDF', extensions: ['pdf'] }]
+    })
+    if (choice.canceled || !choice.filePath) return false
+    const print = new BrowserWindow({
+      show: false,
+      webPreferences: { sandbox: true, javascript: false }
+    })
+    try {
+      await print.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`)
+      const pdf = await print.webContents.printToPDF({
+        printBackground: true,
+        pageSize: 'Letter',
+        margins: { top: 0.5, bottom: 0.5, left: 0.5, right: 0.5 }
+      })
+      await writeFile(choice.filePath, pdf)
+      return true
+    } finally {
+      print.destroy()
+    }
+  })
   createWindow()
-
   app.on('activate', () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (!BrowserWindow.getAllWindows().length) createWindow()
   })
 })
-
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  if (process.platform !== 'darwin') app.quit()
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.

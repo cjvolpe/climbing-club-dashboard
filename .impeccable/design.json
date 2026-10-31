@@ -1,0 +1,582 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T04:04:52.890460+00:00",
+  "title": "Design System: Climbing Club Treasury",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Primary",
+        "canonical": "#4b9cd3",
+        "tonalRamp": [
+          "oklch(15% 0.0398 241.09)",
+          "oklch(27% 0.0740 241.09)",
+          "oklch(39% 0.1024 241.09)",
+          "oklch(51% 0.1138 241.09)",
+          "oklch(63% 0.1138 241.09)",
+          "oklch(75% 0.0911 241.09)",
+          "oklch(87% 0.0512 241.09)",
+          "oklch(95% 0.0171 241.09)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Primary Hover",
+        "canonical": "#71b6e4",
+        "tonalRamp": [
+          "oklch(15% 0.0338 239.07)",
+          "oklch(27% 0.0628 239.07)",
+          "oklch(39% 0.0869 239.07)",
+          "oklch(51% 0.0965 239.07)",
+          "oklch(63% 0.0965 239.07)",
+          "oklch(75% 0.0772 239.07)",
+          "oklch(87% 0.0434 239.07)",
+          "oklch(95% 0.0145 239.07)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "primary-ink": {
+        "role": "primary",
+        "displayName": "Primary Ink",
+        "canonical": "#071a2a",
+        "tonalRamp": [
+          "oklch(15% 0.0142 246.35)",
+          "oklch(27% 0.0263 246.35)",
+          "oklch(39% 0.0365 246.35)",
+          "oklch(51% 0.0405 246.35)",
+          "oklch(63% 0.0405 246.35)",
+          "oklch(75% 0.0324 246.35)",
+          "oklch(87% 0.0182 246.35)",
+          "oklch(95% 0.0061 246.35)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "navy-ground": {
+        "role": "neutral",
+        "displayName": "Navy Ground",
+        "canonical": "#0e1b2a",
+        "tonalRamp": [
+          "oklch(15% 0.0122 252.87)",
+          "oklch(27% 0.0227 252.87)",
+          "oklch(39% 0.0314 252.87)",
+          "oklch(51% 0.0349 252.87)",
+          "oklch(63% 0.0349 252.87)",
+          "oklch(75% 0.0279 252.87)",
+          "oklch(87% 0.0157 252.87)",
+          "oklch(95% 0.0052 252.87)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "inspector-surface": {
+        "role": "neutral",
+        "displayName": "Inspector Surface",
+        "canonical": "#111f2e",
+        "tonalRamp": [
+          "oklch(15% 0.0123 251.11)",
+          "oklch(27% 0.0228 251.11)",
+          "oklch(39% 0.0316 251.11)",
+          "oklch(51% 0.0351 251.11)",
+          "oklch(63% 0.0351 251.11)",
+          "oklch(75% 0.0280 251.11)",
+          "oklch(87% 0.0158 251.11)",
+          "oklch(95% 0.0053 251.11)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "input-surface": {
+        "role": "neutral",
+        "displayName": "Input Surface",
+        "canonical": "#101d2c",
+        "tonalRamp": [
+          "oklch(15% 0.0121 252.80)",
+          "oklch(27% 0.0225 252.80)",
+          "oklch(39% 0.0312 252.80)",
+          "oklch(51% 0.0347 252.80)",
+          "oklch(63% 0.0347 252.80)",
+          "oklch(75% 0.0277 252.80)",
+          "oklch(87% 0.0156 252.80)",
+          "oklch(95% 0.0052 252.80)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "driver-slate": {
+        "role": "neutral",
+        "displayName": "Driver Slate",
+        "canonical": "#1b2b3e",
+        "tonalRamp": [
+          "oklch(15% 0.0144 253.37)",
+          "oklch(27% 0.0268 253.37)",
+          "oklch(39% 0.0371 253.37)",
+          "oklch(51% 0.0413 253.37)",
+          "oklch(63% 0.0413 253.37)",
+          "oklch(75% 0.0330 253.37)",
+          "oklch(87% 0.0186 253.37)",
+          "oklch(95% 0.0062 253.37)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "selected-surface": {
+        "role": "neutral",
+        "displayName": "Selected Surface",
+        "canonical": "#1b4162",
+        "tonalRamp": [
+          "oklch(15% 0.0251 247.50)",
+          "oklch(27% 0.0466 247.50)",
+          "oklch(39% 0.0645 247.50)",
+          "oklch(51% 0.0717 247.50)",
+          "oklch(63% 0.0717 247.50)",
+          "oklch(75% 0.0574 247.50)",
+          "oklch(87% 0.0323 247.50)",
+          "oklch(95% 0.0108 247.50)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "hover-surface": {
+        "role": "neutral",
+        "displayName": "Hover Surface",
+        "canonical": "#19334b",
+        "tonalRamp": [
+          "oklch(15% 0.0189 248.15)",
+          "oklch(27% 0.0351 248.15)",
+          "oklch(39% 0.0486 248.15)",
+          "oklch(51% 0.0540 248.15)",
+          "oklch(63% 0.0540 248.15)",
+          "oklch(75% 0.0432 248.15)",
+          "oklch(87% 0.0243 248.15)",
+          "oklch(95% 0.0081 248.15)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "nav-active": {
+        "role": "neutral",
+        "displayName": "Nav Active",
+        "canonical": "#1c3c5a",
+        "tonalRamp": [
+          "oklch(15% 0.0227 248.84)",
+          "oklch(27% 0.0422 248.84)",
+          "oklch(39% 0.0585 248.84)",
+          "oklch(51% 0.0650 248.84)",
+          "oklch(63% 0.0650 248.84)",
+          "oklch(75% 0.0520 248.84)",
+          "oklch(87% 0.0292 248.84)",
+          "oklch(95% 0.0097 248.84)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "nav-border": {
+        "role": "neutral",
+        "displayName": "Nav Border",
+        "canonical": "#2d5f84",
+        "tonalRamp": [
+          "oklch(15% 0.0283 243.14)",
+          "oklch(27% 0.0526 243.14)",
+          "oklch(39% 0.0728 243.14)",
+          "oklch(51% 0.0809 243.14)",
+          "oklch(63% 0.0809 243.14)",
+          "oklch(75% 0.0647 243.14)",
+          "oklch(87% 0.0364 243.14)",
+          "oklch(95% 0.0121 243.14)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "#2a3b4f",
+        "tonalRamp": [
+          "oklch(15% 0.0146 252.98)",
+          "oklch(27% 0.0271 252.98)",
+          "oklch(39% 0.0375 252.98)",
+          "oklch(51% 0.0416 252.98)",
+          "oklch(63% 0.0416 252.98)",
+          "oklch(75% 0.0333 252.98)",
+          "oklch(87% 0.0187 252.98)",
+          "oklch(95% 0.0062 252.98)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "input-border": {
+        "role": "neutral",
+        "displayName": "Input Border",
+        "canonical": "#42566f",
+        "tonalRamp": [
+          "oklch(15% 0.0169 254.31)",
+          "oklch(27% 0.0313 254.31)",
+          "oklch(39% 0.0434 254.31)",
+          "oklch(51% 0.0482 254.31)",
+          "oklch(63% 0.0482 254.31)",
+          "oklch(75% 0.0385 254.31)",
+          "oklch(87% 0.0217 254.31)",
+          "oklch(95% 0.0072 254.31)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "button-border": {
+        "role": "neutral",
+        "displayName": "Button Border",
+        "canonical": "#466079",
+        "tonalRamp": [
+          "oklch(15% 0.0179 247.96)",
+          "oklch(27% 0.0332 247.96)",
+          "oklch(39% 0.0460 247.96)",
+          "oklch(51% 0.0511 247.96)",
+          "oklch(63% 0.0511 247.96)",
+          "oklch(75% 0.0409 247.96)",
+          "oklch(87% 0.0230 247.96)",
+          "oklch(95% 0.0077 247.96)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "button-hover": {
+        "role": "neutral",
+        "displayName": "Button Hover",
+        "canonical": "#233e58",
+        "tonalRamp": [
+          "oklch(15% 0.0197 248.82)",
+          "oklch(27% 0.0366 248.82)",
+          "oklch(39% 0.0507 248.82)",
+          "oklch(51% 0.0563 248.82)",
+          "oklch(63% 0.0563 248.82)",
+          "oklch(75% 0.0450 248.82)",
+          "oklch(87% 0.0253 248.82)",
+          "oklch(95% 0.0084 248.82)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Text",
+        "canonical": "#edf3fc",
+        "tonalRamp": [
+          "oklch(15% 0.0048 258.34)",
+          "oklch(27% 0.0089 258.34)",
+          "oklch(39% 0.0123 258.34)",
+          "oklch(51% 0.0137 258.34)",
+          "oklch(63% 0.0137 258.34)",
+          "oklch(75% 0.0109 258.34)",
+          "oklch(87% 0.0062 258.34)",
+          "oklch(95% 0.0021 258.34)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "button-text": {
+        "role": "neutral",
+        "displayName": "Button Text",
+        "canonical": "#dcecff",
+        "tonalRamp": [
+          "oklch(15% 0.0108 252.69)",
+          "oklch(27% 0.0201 252.69)",
+          "oklch(39% 0.0279 252.69)",
+          "oklch(51% 0.0310 252.69)",
+          "oklch(63% 0.0310 252.69)",
+          "oklch(75% 0.0248 252.69)",
+          "oklch(87% 0.0139 252.69)",
+          "oklch(95% 0.0046 252.69)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "input-text": {
+        "role": "neutral",
+        "displayName": "Input Text",
+        "canonical": "#eaf1fb",
+        "tonalRamp": [
+          "oklch(15% 0.0054 257.20)",
+          "oklch(27% 0.0100 257.20)",
+          "oklch(39% 0.0139 257.20)",
+          "oklch(51% 0.0154 257.20)",
+          "oklch(63% 0.0154 257.20)",
+          "oklch(75% 0.0123 257.20)",
+          "oklch(87% 0.0069 257.20)",
+          "oklch(95% 0.0023 257.20)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#adbed4",
+        "tonalRamp": [
+          "oklch(15% 0.0128 254.90)",
+          "oklch(27% 0.0237 254.90)",
+          "oklch(39% 0.0328 254.90)",
+          "oklch(51% 0.0365 254.90)",
+          "oklch(63% 0.0365 254.90)",
+          "oklch(75% 0.0292 254.90)",
+          "oklch(87% 0.0164 254.90)",
+          "oklch(95% 0.0055 254.90)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "focus": {
+        "role": "neutral",
+        "displayName": "Focus",
+        "canonical": "#8fd1ff",
+        "tonalRamp": [
+          "oklch(15% 0.0326 239.73)",
+          "oklch(27% 0.0605 239.73)",
+          "oklch(39% 0.0838 239.73)",
+          "oklch(51% 0.0931 239.73)",
+          "oklch(63% 0.0931 239.73)",
+          "oklch(75% 0.0745 239.73)",
+          "oklch(87% 0.0419 239.73)",
+          "oklch(95% 0.0140 239.73)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "review-pending-bg": {
+        "role": "neutral",
+        "displayName": "Review Pending Bg",
+        "canonical": "#4a3e20",
+        "tonalRamp": [
+          "oklch(15% 0.0169 88.19)",
+          "oklch(27% 0.0314 88.19)",
+          "oklch(39% 0.0435 88.19)",
+          "oklch(51% 0.0484 88.19)",
+          "oklch(63% 0.0484 88.19)",
+          "oklch(75% 0.0387 88.19)",
+          "oklch(87% 0.0218 88.19)",
+          "oklch(95% 0.0073 88.19)"
+        ],
+        "purpose": "Semantic review state; synthesized tonal ramp is a panel display aid."
+      },
+      "review-pending-text": {
+        "role": "neutral",
+        "displayName": "Review Pending Text",
+        "canonical": "#f4d681",
+        "tonalRamp": [
+          "oklch(15% 0.0385 90.60)",
+          "oklch(27% 0.0714 90.60)",
+          "oklch(39% 0.0989 90.60)",
+          "oklch(51% 0.1099 90.60)",
+          "oklch(63% 0.1099 90.60)",
+          "oklch(75% 0.0879 90.60)",
+          "oklch(87% 0.0494 90.60)",
+          "oklch(95% 0.0165 90.60)"
+        ],
+        "purpose": "Semantic review state; synthesized tonal ramp is a panel display aid."
+      },
+      "reviewed-bg": {
+        "role": "neutral",
+        "displayName": "Reviewed Bg",
+        "canonical": "#163c37",
+        "tonalRamp": [
+          "oklch(15% 0.0154 183.75)",
+          "oklch(27% 0.0287 183.75)",
+          "oklch(39% 0.0397 183.75)",
+          "oklch(51% 0.0441 183.75)",
+          "oklch(63% 0.0441 183.75)",
+          "oklch(75% 0.0353 183.75)",
+          "oklch(87% 0.0198 183.75)",
+          "oklch(95% 0.0066 183.75)"
+        ],
+        "purpose": "Semantic review state; synthesized tonal ramp is a panel display aid."
+      },
+      "reviewed-text": {
+        "role": "neutral",
+        "displayName": "Reviewed Text",
+        "canonical": "#9de4c9",
+        "tonalRamp": [
+          "oklch(15% 0.0282 168.70)",
+          "oklch(27% 0.0524 168.70)",
+          "oklch(39% 0.0725 168.70)",
+          "oklch(51% 0.0806 168.70)",
+          "oklch(63% 0.0806 168.70)",
+          "oklch(75% 0.0645 168.70)",
+          "oklch(87% 0.0363 168.70)",
+          "oklch(95% 0.0121 168.70)"
+        ],
+        "purpose": "Semantic review state; synthesized tonal ramp is a panel display aid."
+      },
+      "print-paper": {
+        "role": "neutral",
+        "displayName": "Print Paper",
+        "canonical": "#fff",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(27% 0.0000 89.88)",
+          "oklch(39% 0.0000 89.88)",
+          "oklch(51% 0.0000 89.88)",
+          "oklch(63% 0.0000 89.88)",
+          "oklch(75% 0.0000 89.88)",
+          "oklch(87% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      },
+      "print-ink": {
+        "role": "neutral",
+        "displayName": "Print Ink",
+        "canonical": "#162333",
+        "tonalRamp": [
+          "oklch(15% 0.0124 254.13)",
+          "oklch(27% 0.0231 254.13)",
+          "oklch(39% 0.0320 254.13)",
+          "oklch(51% 0.0355 254.13)",
+          "oklch(63% 0.0355 254.13)",
+          "oklch(75% 0.0284 254.13)",
+          "oklch(87% 0.0160 254.13)",
+          "oklch(95% 0.0053 254.13)"
+        ],
+        "purpose": "Source color; synthesized tonal ramp is a panel display aid."
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Trip and settings headings; 25px on narrow windows."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section headings; inspector variant 16px."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Operational system sans text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Metadata and table labels."
+      },
+      "print-body": {
+        "displayName": "Print Body",
+        "purpose": "White printable receipt."
+      },
+      "print-name": {
+        "displayName": "Generated Driver Name",
+        "purpose": "Bundled offline Allura; generated text, not a captured signature."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "button-background",
+        "value": "background 0.16s ease-out",
+        "purpose": "Button hover state; transitions disabled under prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-inspector",
+        "value": "1600px"
+      },
+      {
+        "name": "dedicated-inspector",
+        "value": "1250px"
+      },
+      {
+        "name": "narrow-navigation",
+        "value": "760px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Blue action with dark semibold ink.",
+      "html": "<button class=\"ds-btn ds-primary\">Mark as reviewed</button>",
+      "css": ".ds-btn{font-family:\"Segoe UI\",Arial,sans-serif;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;border:1px solid #466079;color:#dcecff;background:transparent;border-radius:5px;padding:10px 14px;min-height:40px;transition:background .16s ease-out}.ds-btn:hover{background:#233e58}.ds-btn:disabled{opacity:.5;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-btn{transition:none}}.ds-primary{background:var(--blue,#4b9cd3);border-color:var(--blue,#4b9cd3);color:#071a2a;font-weight:650}.ds-primary:hover{background:#71b6e4}.ds-btn:focus-visible{outline:2px solid #8fd1ff;outline-offset:3px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Bordered action for preview and recovery.",
+      "html": "<button class=\"ds-btn\">Preview PDF</button>",
+      "css": ".ds-btn{font-family:\"Segoe UI\",Arial,sans-serif;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;border:1px solid #466079;color:#dcecff;background:transparent;border-radius:5px;padding:10px 14px;min-height:40px;transition:background .16s ease-out}.ds-btn:hover{background:#233e58}.ds-btn:disabled{opacity:.5;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-btn{transition:none}}.ds-btn:focus-visible{outline:2px solid #8fd1ff;outline-offset:3px}"
+    },
+    {
+      "name": "Text Button",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "Quiet add or return action.",
+      "html": "<button class=\"ds-btn ds-text\">Add driver</button>",
+      "css": ".ds-btn{font-family:\"Segoe UI\",Arial,sans-serif;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;border:1px solid #466079;color:#dcecff;background:transparent;border-radius:5px;padding:10px 14px;min-height:40px;transition:background .16s ease-out}.ds-btn:hover{background:#233e58}.ds-btn:disabled{opacity:.5;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-btn{transition:none}}.ds-text{border-color:transparent;color:#82c5f4;padding:8px}.ds-btn:focus-visible{outline:2px solid #8fd1ff;outline-offset:3px}"
+    },
+    {
+      "name": "Labeled Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Visible label and dark editable field.",
+      "html": "<label class=\"ds-field\"><span>Total cost (USD)</span><input type=\"number\" value=\"0.00\" step=\"0.01\"></label>",
+      "css": ".ds-field{font-family:\"Segoe UI\",Arial,sans-serif;font-size:14px;display:flex;flex-direction:column;gap:8px;margin-bottom:18px}.ds-field span{font-size:13px;color:#b9cce3}.ds-field input{font:inherit;color:#eaf1fb;background:#101d2c;border:1px solid #42566f;border-radius:4px;padding:9px 10px;min-width:0;caret-color:#75c6ff}.ds-field input::placeholder{color:#a4b5ca}.ds-field input:focus-visible{outline:2px solid #8fd1ff;outline-offset:3px}"
+    },
+    {
+      "name": "Active Navigation",
+      "kind": "nav",
+      "refersTo": "nav-active",
+      "description": "Icon and text identify the current operational section.",
+      "html": "<nav class=\"ds-nav\"><button aria-current=\"page\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 5h14v15H5z M8 3v4 M16 3v4 M5 10h14\"/></svg>Trips</button></nav>",
+      "css": ".ds-nav button{font-family:\"Segoe UI\",Arial,sans-serif;font-size:14px;display:inline-flex;align-items:center;justify-content:flex-start;gap:14px;padding:13px 16px;min-height:40px;border-radius:5px;cursor:pointer;background:#1c3c5a;border:1px solid #2d5f84;color:#fff;transition:background .16s ease-out}.ds-nav button:hover{background:#233e58}@media(prefers-reduced-motion:reduce){.ds-nav button{transition:none}}.ds-nav button:focus-visible{outline:2px solid #8fd1ff;outline-offset:3px}"
+    },
+    {
+      "name": "Pending Review Badge",
+      "kind": "chip",
+      "refersTo": "status-pending",
+      "description": "Passive label; status is explicit in text.",
+      "html": "<span class=\"ds-status\">Needs review</span>",
+      "css": ".ds-status{font-family:\"Segoe UI\",Arial,sans-serif;font-size:14px;font-size:11px;white-space:nowrap;display:inline-block;padding:5px 9px;border-radius:20px;background:#4a3e20;color:#f4d681}"
+    },
+    {
+      "name": "Reviewed Badge",
+      "kind": "chip",
+      "refersTo": "status-reviewed",
+      "description": "Passive completed-review label.",
+      "html": "<span class=\"ds-reviewed\">Reviewed</span>",
+      "css": ".ds-reviewed{font-family:\"Segoe UI\",Arial,sans-serif;font-size:14px;font-size:11px;white-space:nowrap;display:inline-block;padding:5px 9px;border-radius:20px;background:#163c37;color:#9de4c9}"
+    },
+    {
+      "name": "Inspector Panel",
+      "kind": "card",
+      "refersTo": "inspector",
+      "description": "Flat review surface with explicit manual-entry guidance.",
+      "html": "<aside class=\"ds-inspector\"><h2>Receipt review</h2><p>Manual review required. Automatic extraction is not configured.</p></aside>",
+      "css": ".ds-inspector{font-family:\"Segoe UI\",Arial,sans-serif;font-size:14px;color:#edf3fc;background:#111f2e;border:1px solid var(--line,#2a3b4f);padding:17px;border-radius:6px}.ds-inspector h2{font-size:16px;font-weight:600;margin:0 0 17px}.ds-inspector p{color:#e0cc92;font-size:12px;line-height:1.6;margin:0}"
+    },
+    {
+      "name": "Selected Receipt Row",
+      "kind": "custom",
+      "refersTo": "button-secondary",
+      "description": "Ledger selection with aligned amount and a receipt action.",
+      "html": "<div class=\"ds-ledger\"><table><tbody><tr class=\"ds-selected\"><td><button>Receipt image<small>Receipt 1</small></button></td><td class=\"ds-number\">$0.00</td></tr></tbody></table></div>",
+      "css": ".ds-ledger{font-family:\"Segoe UI\",Arial,sans-serif;font-size:14px;border:1px solid var(--line,#2a3b4f);border-radius:6px;overflow:hidden;color:#edf3fc}.ds-ledger table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}.ds-selected{background:#1b4162;outline:1px solid var(--blue,#4b9cd3);outline-offset:-1px}.ds-selected:hover{background:#19334b}.ds-selected td{padding:14px 15px;font-size:13px}.ds-selected td:first-child{padding-left:41px}.ds-number{text-align:right;white-space:nowrap}.ds-selected button{font:inherit;color:#dcecff;border:0;padding:0;background:transparent;text-align:left;min-height:38px;cursor:pointer}.ds-selected button:hover{background:#233e58}.ds-selected small{display:block;color:var(--muted,#adbed4);font-size:12px;margin-top:5px}.ds-selected button:focus-visible{outline:2px solid #8fd1ff;outline-offset:3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Driver Ledger",
+    "overview": "The approved dark navy and slate identity frames a practical treasury workspace. Blue marks actions and the selected original receipt; monetary columns and driver groups provide the visual structure. The metaphor describes the implemented direction rather than a newly approved brand name.\n\nThe app uses system sans typography and compact, bordered work surfaces. A white printable document is a separate reading context. This document records the current source in `src/renderer/src/App.tsx` and `src/renderer/src/assets/main.css`; the formal composition-led fidelity gate remains open. It does not certify pixel fidelity to the approved reference.",
+    "keyCharacteristics": [
+      "Navy shell with slate driver groups and blue selection.",
+      "Aligned tabular monetary values and explicit review labels.",
+      "Original-image inspector beside the ledger or in a dedicated narrow view.",
+      "System UI typography, with bundled cursive restricted to generated PDF names."
+    ],
+    "rules": [
+      {
+        "name": "The Explicit Review Rule",
+        "body": "Pair review color with \u201cNeeds review\u201d or \u201cReviewed\u201d; color alone must not carry readiness.",
+        "section": "colors"
+      },
+      {
+        "name": "The Cursive Boundary Rule",
+        "body": "Keep Allura in generated PDF names; keep operational UI in system sans.",
+        "section": "typography"
+      }
+    ],
+    "dos": [
+      "Do preserve navy ground, slate driver groups, and blue actions and selection.",
+      "Do align monetary columns right and retain tabular numerals.",
+      "Do show review labels alongside semantic status colors.",
+      "Do retain a visible return control in the dedicated narrow inspector.",
+      "Do keep print content readable on white and bundle the generated-name font offline."
+    ],
+    "donts": [
+      "Don't introduce decorative shadows into the flat ledger and inspector.",
+      "Don't use Allura for navigation, fields, or operational headings.",
+      "Don't imply automatic extraction or captured signatures in visual copy.",
+      "Don't claim reference pixel fidelity or formal composition acceptance from this source documentation."
+    ]
+  }
+}

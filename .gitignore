@@ -8,3 +8,8 @@ out
 .impeccable/config.local.json
 .impeccable/live/
 .agents/skills/impeccable/scripts/bin/
+
+# Generated Impeccable build state and review output
+.impeccable/build/
+.impeccable/review/*
+!.impeccable/review/smoke.cjs

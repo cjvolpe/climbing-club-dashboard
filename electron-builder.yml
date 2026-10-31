@@ -3,6 +3,9 @@ productName: dashboard
 directories:
   buildResources: build
 files:
+  - '!**/.impeccable/**'
+  - '!**/.agents/**'
+  - '!**/.codex/**'
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'

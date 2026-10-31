@@ -27,7 +27,7 @@ The treasurer uploads receipts for an event, collects the extracted spending dat
 - Store original receipts and extracted data on an assigned drive.
 - Generate a printable PDF trip receipt after collection is complete.
 - Support offline operation and require little ongoing maintenance.
-- The repository currently contains the Electron starter interface; the requested treasury workflow is product scope, not implemented functionality.
+- The Electron application implements the manual receipt-to-PDF workflow. Automatic extraction remains intended product scope.
 
 ### Open Decisions
 
@@ -40,7 +40,7 @@ The treasurer uploads receipts for an event, collects the extracted spending dat
 
 ## Evidence on Hand
 
-- `src/renderer/src/App.tsx`: starter interface; no implemented treasury workflows or real trip data.
+- `src/renderer/src/App.tsx`: implemented trip, driver, manual receipt review, profile, storage, and PDF workflows; no real club records are seeded.
 - `src/main/index.ts` and `src/preload/`: existing Electron application structure.
 - No real receipt samples, extraction benchmarks, or PDF examples have been supplied in this conversation. Future work must not invent these as product evidence.
 
@@ -50,3 +50,11 @@ The treasurer uploads receipts for an event, collects the extracted spending dat
 - Keep original receipts and extracted data together under the assigned drive.
 - Make routine treasury tasks and officer handoffs straightforward.
 - Favor solutions that require little ongoing maintenance.
+
+## Implementation status
+
+The Electron application now implements trip creation, editable driver names and reimbursement methods, original-image import (PNG/JPEG/WebP), manually entered receipt amounts, explicit review state, driver and trip totals, profile details, workspace-folder selection/copy, autosave, PDF preview, and US Letter PDF export. Original images can be enlarged and scrolled during review. Narrow windows use a dedicated inspector with a visible return control.
+
+Automatic receipt extraction is not implemented; values require manual entry and review. No OCR service or external transmission is configured. This remains a capability gap from the intended product scope.
+
+The initial workspace lives under Electron userData. Assigned-folder selection copies the workspace into an empty external folder and leaves the prior copy intact. Receipt numbers use start date plus sequence and remain stable on repeat exports. Export includes generated cursive names using bundled Allura, not captured signatures. Trip dates are set at creation; date editing and automatic migration of other workspace folders are not implemented.
