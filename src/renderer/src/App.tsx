@@ -472,6 +472,7 @@ export default function App() {
       }))
     }
     setData({ ...data, trips: [...data.trips, t] })
+    setDraft({ name: '', start: '', end: '', location: '', count: '1' })
     setTripId(t.id)
     setEditor(false)
     setSelected('')
