@@ -339,6 +339,32 @@ td {
   font-size: 12px;
   padding: 7px;
 }
+.driver-actions {
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  align-items: center;
+  gap: 8px;
+}
+.reimbursement-heading {
+  text-align: center;
+}
+.driver-actions select {
+  grid-column: 2;
+  justify-self: center;
+}
+.delete-driver {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 5px;
+  color: #f2aaa4;
+  background: transparent;
+}
+.delete-driver:hover:not(:disabled) {
+  background: #512d34;
+}
 .status {
   font-size: 11px;
   white-space: nowrap;
@@ -402,11 +428,19 @@ td {
   align-items: center;
   justify-content: space-between;
   color: #bdcde2;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 .ledger-summary > div {
   display: flex;
   align-items: center;
   gap: 22px;
+  flex-wrap: wrap;
+}
+.summary-amount {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 .ledger-summary strong {
   font-size: 25px;

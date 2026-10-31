@@ -37,6 +37,7 @@ export interface Data {
 export interface TreasuryAPI {
   load(): Promise<{ data: Data | null; folder: string }>
   save(data: Data): Promise<void>
+  confirmDeleteDriver(name: string): Promise<boolean>
   chooseFolder(): Promise<string | null>
   importReceipts(): Promise<
     Pick<Receipt, 'name' | 'file' | 'total' | 'price' | 'totalParseError' | 'priceParseError'>[]

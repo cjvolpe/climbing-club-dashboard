@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import { basename, extname, isAbsolute, join, relative, resolve } from 'node:path'
 import { is } from '@electron-toolkit/utils'
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
@@ -11,9 +11,34 @@ const config = () => join(app.getPath('userData'), 'treasury-storage.json')
 async function save(data: Data): Promise<void> {
   await mkdir(folder, { recursive: true })
   const target = join(folder, 'treasury.json')
+  let previous: Data | null = null
+  try {
+    previous = JSON.parse(await readFile(target, 'utf8'))
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+  }
+  const files = (records: Data) =>
+    records.trips.flatMap((trip) =>
+      trip.drivers.flatMap((driver) =>
+        driver.receipts.flatMap((receipt) => (receipt.file ? [receipt.file] : []))
+      )
+    )
+  const retained = new Set(files(data))
   await writeFile(`${target}.tmp`, JSON.stringify(data, null, 2))
   const { rename } = await import('node:fs/promises')
   await rename(`${target}.tmp`, target)
+  for (const file of new Set(previous ? files(previous) : [])) {
+    if (retained.has(file)) continue
+    const path = resolve(folder, file)
+    const within = relative(join(folder, 'receipts'), path)
+    if (!within || within.startsWith('..') || isAbsolute(within))
+      throw new Error('Invalid receipt path')
+    try {
+      await unlink(path)
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    }
+  }
 }
 function createWindow(): void {
   const win = new BrowserWindow({
@@ -44,6 +69,24 @@ app.whenReady().then(async () => {
     }
   })
   ipcMain.handle('treasury:save', (_, data: Data) => save(data))
+  ipcMain.handle('treasury:confirm-delete-driver', async (event, name: string) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const options = {
+      type: 'warning' as const,
+      buttons: ['Cancel', 'Delete driver'],
+      defaultId: 0,
+      cancelId: 0,
+      title: 'Delete driver',
+      message: `Delete ${name} from this trip?`,
+      detail:
+        'This permanently removes the driver, their receipts, and their stored receipt images. This cannot be undone.',
+      noLink: true
+    }
+    const result = win
+      ? await dialog.showMessageBox(win, options)
+      : await dialog.showMessageBox(options)
+    return result.response === 1
+  })
   ipcMain.handle('treasury:folder', async () => {
     const choice = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'] })
     if (choice.canceled) return null

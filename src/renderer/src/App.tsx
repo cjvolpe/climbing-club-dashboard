@@ -30,6 +30,7 @@ function Icon({ name }: { name: string }) {
     storage: 'M4 6c0-4 16-4 16 0s-16 4-16 0v12c0 4 16 4 16 0V6 M4 12c0 4 16 4 16 0',
     plus: 'M12 4v16 M4 12h16',
     minus: 'M4 12h16',
+    trash: 'M3 6h18 M9 6V3h6v3 M5 6l1 15h12l1-15 M10 10v7 M14 10v7',
     pdf: 'M6 3h8l4 4v14H6z M14 3v5h4 M9 12h6 M9 16h6',
     mountain: 'M2 20 9 6l4 7 3-5 6 12H2 M6 12l3 2 3-2',
     close: 'M5 5l14 14 M19 5 5 19',
@@ -107,8 +108,7 @@ function documentHTML(trip: Trip, data: Data) {
     esc(trip.location) +
     ' · ' +
     esc(trip.start) +
-    ' – ' +
-    esc(trip.end) +
+    (trip.start === trip.end ? '' : ' – ' + esc(trip.end)) +
     '<br>Receipt ' +
     esc(trip.number) +
     ' · Created ' +
@@ -249,19 +249,27 @@ export default function App() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [saveState, setSaveState] = useState('Loading records…')
-  const [importDriver, setImportDriver] = useState('')
   const serial = useRef(Promise.resolve())
   const trip = data.trips.find((t) => t.id === tripId) || data.trips[0]
   const driver = trip?.drivers.find((d) => d.receipts.some((r) => r.id === selected))
   const receipt = driver?.receipts.find((r) => r.id === selected)
   const receipts = trip?.drivers.flatMap((d) => d.receipts) || []
+  const recordedPrices = receipts
+    .filter((r) => !r.priceParseError && /^\d+(\.\d{1,3})?$/.test(r.price))
+    .map((r) => Number(r.price))
+    .filter((price) => Number.isFinite(price) && price > 0)
+  const averagePrice = recordedPrices.length
+    ? recordedPrices.reduce((total, price) => total + price, 0) / recordedPrices.length
+    : null
   const reviewed = receipts.filter((r) => r.reviewed && valid(r)).length
   const missingProfile = Object.values(data.profile).some((v) => !v.trim())
   const ready =
     !!trip &&
-    receipts.length > 0 &&
-    reviewed === receipts.length &&
-    trip.drivers.every((d) => d.name.trim() && d.receipts.length > 0) &&
+    trip.drivers.length > 0 &&
+    trip.drivers.every(
+      (d) =>
+        d.name.trim() && d.receipts.length > 0 && d.receipts.every((r) => r.reviewed && valid(r))
+    ) &&
     !missingProfile
   useEffect(() => {
     if (!window.api) {
@@ -334,6 +342,30 @@ export default function App() {
         receipts: d.receipts.map((r) => (r.id === receipt.id ? { ...r, ...patch } : r))
       }))
   }
+  async function deleteDriver(d: Driver, index: number) {
+    if (busy) return
+    setBusy(true)
+    try {
+      const name = d.name.trim() || `Driver ${index + 1}`
+      const confirmed = window.api
+        ? await window.api.confirmDeleteDriver(name)
+        : window.confirm(
+            `Delete ${name} and all their receipts and images from this trip? This cannot be undone.`
+          )
+      if (!confirmed) return
+      updateTrip((t) => ({ ...t, drivers: t.drivers.filter((item) => item.id !== d.id) }))
+      if (d.receipts.some((r) => r.id === selected)) {
+        setSelected('')
+        setImage('')
+        setViewerOpen(false)
+      }
+      setCollapsed((current) => current.filter((did) => did !== d.id))
+    } catch (error) {
+      setMessage(`Could not delete driver. ${String(error)}`)
+    } finally {
+      setBusy(false)
+    }
+  }
   async function importFiles(did: string) {
     if (!window.api) {
       setMessage('Open the Electron application to import and store receipt images.')
@@ -346,7 +378,6 @@ export default function App() {
       if (items.length) {
         updateDriver(did, (d) => ({ ...d, receipts: [...d.receipts, ...items] }))
         setSelected(items[0].id)
-        setImportDriver('')
       }
     } catch (e) {
       setMessage(`Receipt import failed. Check folder access and try again. ${String(e)}`)
@@ -557,28 +588,22 @@ export default function App() {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric'
-                        })}{' '}
-                        —{' '}
-                        {new Date(`${trip.end}T12:00:00`).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
                         })}
+                        {trip.start !== trip.end && (
+                          <>
+                            {' — '}
+                            {new Date(`${trip.end}T12:00:00`).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </>
+                        )}
                         <span className="separator">·</span>
                         {trip.location}
                       </p>
                     </div>
                     <div className="actions">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setImportDriver(importDriver ? '' : trip.drivers[0]?.id || '')
-                        }
-                        disabled={busy}
-                      >
-                        <Icon name="plus" />
-                        Add receipts
-                      </button>
                       <button
                         type="button"
                         className="primary"
@@ -592,35 +617,6 @@ export default function App() {
                       </button>
                     </div>
                   </div>
-                  {importDriver && (
-                    <div className="import-bar">
-                      <label>
-                        Add receipts for
-                        <select
-                          value={importDriver}
-                          onChange={(e) => setImportDriver(e.target.value)}
-                        >
-                          {trip.drivers.map((d, i) => (
-                            <option key={d.id} value={d.id}>
-                              {d.name || `Driver ${i + 1}`}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <button
-                        type="button"
-                        className="primary"
-                        disabled={busy}
-                        onClick={() => importFiles(importDriver)}
-                      >
-                        {busy ? 'Importing…' : 'Choose images'}
-                      </button>
-                      <button type="button" onClick={() => setImportDriver('')}>
-                        Cancel
-                      </button>
-                      <small>PNG, JPG, WebP · enter values manually</small>
-                    </div>
-                  )}
                   {preview ? (
                     <div className="preview">
                       <div className="preview-toolbar">
@@ -633,6 +629,7 @@ export default function App() {
                           type="button"
                           disabled={!ready || busy}
                           onClick={async () => {
+                            if (!ready || busy) return
                             setBusy(true)
                             try {
                               if (!window.api)
@@ -704,7 +701,7 @@ export default function App() {
                                 <th className="number">Total cost</th>
                                 <th className="number">Price / gal</th>
                                 <th>Status</th>
-                                <th>Reimbursement</th>
+                                <th className="reimbursement-heading">Reimbursement</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -742,6 +739,8 @@ export default function App() {
                                       updateDriver(d.id, (current) => ({ ...current, ...patch }))
                                     }
                                     onImport={() => importFiles(d.id)}
+                                    onDelete={() => deleteDriver(d, index)}
+                                    busy={busy}
                                   />
                                 )
                               })}
@@ -773,8 +772,14 @@ export default function App() {
                             {receipts.length} receipts
                           </span>
                           <div>
-                            <span>Trip total</span>
-                            <strong>{money(trip.drivers.reduce((n, d) => n + sum(d), 0))}</strong>
+                            <span className="summary-amount">
+                              <span>Avg cost / gal</span>
+                              <strong>{averagePrice === null ? '—' : `$${averagePrice.toFixed(3)}`}</strong>
+                            </span>
+                            <span className="summary-amount">
+                              <span>Trip total</span>
+                              <strong>{money(trip.drivers.reduce((n, d) => n + sum(d), 0))}</strong>
+                            </span>
                           </div>
                         </div>
                       </section>
@@ -861,19 +866,6 @@ export default function App() {
                               })
                             }
                           />
-                          <label className="field">
-                            <span>Reimbursement method</span>
-                            <select
-                              value={driver.method}
-                              onChange={(e) =>
-                                updateDriver(driver.id, (d) => ({ ...d, method: e.target.value }))
-                              }
-                            >
-                              {['Zelle', 'CashApp', 'Check'].map((m) => (
-                                <option key={m}>{m}</option>
-                              ))}
-                            </select>
-                          </label>
                           <button
                             type="button"
                             className="primary review-button"
@@ -1022,7 +1014,9 @@ function DriverRows({
   onToggle,
   onSelect,
   onChange,
-  onImport
+  onImport,
+  onDelete,
+  busy
 }: {
   driver: Driver
   index: number
@@ -1033,6 +1027,8 @@ function DriverRows({
   onSelect: (id: string) => void
   onChange: (patch: Partial<Driver>) => void
   onImport: () => void
+  onDelete: () => void
+  busy: boolean
 }) {
   return (
     <>
@@ -1072,15 +1068,27 @@ function DriverRows({
           </span>
         </td>
         <td>
-          <select
-            aria-label={`Reimbursement for ${d.name || `driver ${index + 1}`}`}
-            value={d.method}
-            onChange={(e) => onChange({ method: e.target.value })}
-          >
-            {['Zelle', 'CashApp', 'Check'].map((m) => (
-              <option key={m}>{m}</option>
-            ))}
-          </select>
+          <div className="driver-actions">
+            <select
+              aria-label={`Reimbursement for ${d.name || `driver ${index + 1}`}`}
+              value={d.method}
+              onChange={(e) => onChange({ method: e.target.value })}
+            >
+              {['Zelle', 'CashApp', 'Check'].map((m) => (
+                <option key={m}>{m}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="delete-driver"
+              aria-label={`Delete ${d.name || `driver ${index + 1}`}`}
+              title="Delete driver"
+              disabled={busy}
+              onClick={onDelete}
+            >
+              <Icon name="trash" />
+            </button>
+          </div>
         </td>
       </tr>
       {!collapsed && (
@@ -1105,16 +1113,21 @@ function DriverRows({
               </td>
             </tr>
           ))}
-          {!d.receipts.length && (
-            <tr>
-              <td colSpan={5} className="empty-driver">
-                <span>No receipts yet.</span>
-                <button type="button" className="text-button" onClick={onImport}>
-                  Add receipt images
-                </button>
-              </td>
-            </tr>
-          )}
+          <tr>
+            <td colSpan={5} className="empty-driver">
+              {!d.receipts.length && <span>No receipts yet.</span>}
+              <button
+                type="button"
+                className="text-button"
+                aria-label={`Add receipts for ${d.name || `driver ${index + 1}`}`}
+                disabled={busy}
+                onClick={onImport}
+              >
+                <Icon name="plus" />
+                Add receipts
+              </button>
+            </td>
+          </tr>
         </>
       )}
     </>
