@@ -10,7 +10,8 @@ const api: TreasuryAPI = {
   chooseFolder: () => ipcRenderer.invoke('treasury:folder'),
   importReceipts: () => ipcRenderer.invoke('treasury:import'),
   readReceipt: (file) => ipcRenderer.invoke('treasury:read', file),
-  exportPDF: (html, name) => ipcRenderer.invoke('treasury:pdf', html, name)
+  exportPDF: (html, name) => ipcRenderer.invoke('treasury:pdf', html, name),
+  previewPDF: (html) => ipcRenderer.invoke('treasury:preview-pdf', html)
 }
 contextBridge.exposeInMainWorld('electron', electronAPI)
 contextBridge.exposeInMainWorld('api', api)

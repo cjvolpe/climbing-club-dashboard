@@ -4,6 +4,9 @@ out
 .DS_Store
 *.log*
 
+# Local scratch files, review images, and downloaded tooling
+/tmp/
+
 # Local Impeccable settings, live sessions, and downloaded binaries
 .impeccable/config.local.json
 .impeccable/live/

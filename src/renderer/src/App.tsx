@@ -105,64 +105,112 @@ function Field({
 }
 function documentHTML(trip: Trip, data: Data) {
   const p = data.profile
+  const watermarkBackground = p.icon
+    ? `data:image/svg+xml,${encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="816" height="1056" viewBox="0 0 816 1056"><image href="${esc(p.icon)}" x="122" y="158" width="572" height="740" preserveAspectRatio="xMidYMid meet"/></svg>`
+      )}`
+    : ''
+  const pdfDate = (date: string) => {
+    const [year, month, day] = date.split('-')
+    return `${month}-${day}-${year}`
+  }
   return (
     '<!doctype html><html><head><meta charset="utf-8"><title>Trip receipt</title><style>@font-face{font-family:Allura;src:url("' +
     cursiveFont +
-    '") format("truetype")}html{color-scheme:light}body{font:14px Arial,sans-serif;color:#162333;background:white;margin:28px}h1{font-size:28px}h2{font-size:19px;margin-top:30px}p{line-height:1.6}table{border-collapse:collapse;width:100%;margin:16px 0}th,td{text-align:left;padding:10px;border-bottom:1px solid #cbd2d9;overflow-wrap:anywhere}.num{text-align:right}.signature{font-family:Allura,cursive;font-size:30px}section{break-inside:avoid}small{color:#526071}</style></head><body>' +
-    '<h1>' +
+    '") format("truetype")}html{color-scheme:light}body{font:14px Arial,sans-serif;color:#162333;background:white;margin:28px}h1{font-size:28px}h2{font-size:19px;margin-top:30px}p{line-height:1.6}table{border-collapse:collapse;width:100%;margin:16px 0}th,td{text-align:left;padding:10px;border-bottom:1px solid #cbd2d9;overflow-wrap:anywhere}.num{text-align:right}.signature{font-family:Allura,cursive;font-size:30px}section{break-inside:avoid}small{color:#526071}.driver-payment{margin:28px 0 64px}.driver-payment table{table-layout:fixed}.driver-payment th,.driver-payment td{border:0;padding:4px 0;font-weight:normal;vertical-align:top}.payment-item{margin:0 0 12px}.payment-item thead th{text-align:center;padding-bottom:8px}.payment-item thead .num{text-align:right}.quantity{text-align:center}.payment-totals{width:52%;margin:0 0 20px auto;border-top:1px solid #162333}.payment-totals th{width:55%}.payment-signature{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:24px;width:58%;margin-left:auto}.payment-signature .signature{text-align:center;border-bottom:1px solid #162333;font-size:26px;overflow-wrap:anywhere}.payment-method{display:grid;grid-template-columns:40% 1fr;gap:16px;margin-top:20px;overflow-wrap:anywhere}</style></head><body>' +
+    '<style>.trip-title{grid-column:2;grid-row:1;font-size:32px;text-align:center;margin:0;min-height:72px;overflow-wrap:anywhere}.document-header{display:grid;grid-template-columns:1fr 1.3fr 1fr;column-gap:16px;row-gap:24px;align-items:start;break-inside:avoid;position:relative}.receipt-watermark{position:fixed;inset:0;width:100%;height:100%;box-sizing:border-box;padding:15%;object-fit:contain;background:transparent;mix-blend-mode:multiply;opacity:0.08;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}.pdf-content{position:relative;z-index:1;display:flex;flex-direction:column;min-height:calc(10in - 56px)}.final-payment{display:flex;flex-direction:column;flex:1;break-inside:avoid}.final-payment .driver-payment{margin-bottom:0}.trip-total{width:40%;margin:auto 0 0 auto;padding-top:30px;text-align:center;break-inside:avoid}@media screen{body{position:relative}.receipt-watermark{display:none}.preview-watermark{position:absolute;inset:0;opacity:0.08;pointer-events:none;background-repeat:repeat-y;background-position:top center;background-size:100% auto;z-index:0}}@media print{.preview-watermark{display:none}}.header-details{display:contents}.header-details p{margin:0;min-width:0;overflow-wrap:anywhere}.trip-details{grid-column:1 / -1;grid-row:2;text-align:left}.profile-details{grid-column:3;grid-row:1;text-align:right}.document-header hr{grid-column:1 / -1;width:100%;border:0;border-top:1px solid #cbd2d9;margin:0}</style>' +
+    (p.icon
+      ? '<img class="receipt-watermark" src="' + esc(p.icon) + '" alt="" aria-hidden="true">'
+      : '') +
+    (p.icon
+      ? `<div class="preview-watermark" aria-hidden="true" style="background-image:url(&quot;${esc(watermarkBackground)}&quot;)"></div>`
+      : '') +
+    '<div class="pdf-content"><header class="document-header"><h1 class="trip-title">' +
+    esc(trip.name) +
+    ' Receipt of Sales</h1>' +
+    '<div class="header-details"><p class="trip-details"><strong>Location:</strong> ' +
+    esc(trip.location) +
+    '<br><strong>Trip date:</strong> ' +
+    esc(pdfDate(trip.start)) +
+    (trip.start === trip.end ? '' : ' &ndash; ' + esc(pdfDate(trip.end))) +
+    '<br><strong>Receipt number:</strong> ' +
+    esc(trip.number) +
+    '<br><strong>Created:</strong> ' +
+    new Date().toLocaleDateString('en-US') +
+    '</p><p class="profile-details">' +
     esc(p.organization) +
-    '</h1><p>' +
+    '<br>' +
     esc(p.address) +
     '<br>' +
     esc(p.city) +
     '<br>' +
     esc(p.email) +
-    '<br>Truist account: ' +
+    '<br><strong>Truist account:</strong> ' +
     esc(p.account) +
-    '</p><hr><h2>' +
-    esc(trip.name) +
-    '</h2><p>' +
-    esc(trip.location) +
-    ' · ' +
-    esc(trip.start) +
-    (trip.start === trip.end ? '' : ' – ' + esc(trip.end)) +
-    '<br>Receipt ' +
-    esc(trip.number) +
-    ' · Created ' +
-    new Date().toLocaleDateString('en-US') +
-    '</p>' +
+    '</p></div><hr></header>' +
     trip.drivers
       .map(
-        (d) =>
-          '<section><h2>' +
+        (d, index) =>
+          (index === trip.drivers.length - 1 ? '<div class="final-payment">' : '') +
+          '<section class="driver-payment"><table class="payment-item"><colgroup><col style="width:58%"><col style="width:16%"><col style="width:26%"></colgroup><thead><tr><th>Item Description</th><th class="quantity">Quantity</th><th class="num">Price</th></tr></thead><tbody><tr><td>' +
           esc(d.name) +
-          '</h2><p>Reimbursement: ' +
-          esc(d.method) +
-          '</p><table><thead><tr><th>Receipt</th><th class="num">Price / gallon</th><th class="num">Total cost</th></tr></thead><tbody>' +
-          d.receipts
-            .map(
-              (r, i) =>
-                '<tr><td>' +
-                String(i + 1) +
-                '. ' +
-                esc(r.name) +
-                '</td><td class="num">$' +
-                Number(r.price).toFixed(3) +
-                '</td><td class="num">' +
-                money(Number(r.total)) +
-                '</td></tr>'
-            )
-            .join('') +
-          '</tbody><tfoot><tr><th>Driver total</th><th></th><th class="num">' +
+          ' Gas Reimbursement</td><td class="quantity">1</td><td class="num">' +
           money(sum(d)) +
-          '</th></tr></tfoot></table><div class="signature">' +
+          '</td></tr></tbody></table><table class="payment-totals"><tbody><tr><th scope="row">Total</th><td class="num">' +
+          money(sum(d)) +
+          '</td></tr><tr><th scope="row">Amount Paid</th><td class="num">' +
+          money(sum(d)) +
+          '</td></tr><tr><th scope="row">Amount</th><td class="num">' +
+          money(0) +
+          '</td></tr></tbody></table><div class="payment-signature"><span>Signature</span><div class="signature">' +
           esc(d.name) +
-          '</div><small>Signature</small></section>'
+          '</div></div><div class="payment-method"><span>Payment Method</span><span>' +
+          esc(d.method) +
+          '</span></div></section>' +
+          (index === trip.drivers.length - 1
+            ? '<h2 class="trip-total">Total: ' +
+              money(trip.drivers.reduce((n, driver) => n + sum(driver), 0)) +
+              '</h2></div>'
+            : '')
       )
       .join('') +
-    '<h2>Trip total: ' +
-    money(trip.drivers.reduce((n, d) => n + sum(d), 0)) +
-    '</h2></body></html>'
+    (trip.drivers.length ? '' : '<h2 class="trip-total">Total: ' + money(0) + '</h2>') +
+    '</div></body></html>'
+  )
+}
+function PDFPreview({ html }: { html: string }) {
+  const [url, setUrl] = useState('')
+  const [error, setError] = useState('')
+  useEffect(() => {
+    let cancelled = false
+    let objectURL = ''
+    setUrl('')
+    setError('')
+    async function render() {
+      try {
+        if (!window.api) throw new Error('Open the desktop application to preview PDF pages.')
+        const base64 = await window.api.previewPDF(html)
+        if (cancelled) return
+        const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0))
+        objectURL = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))
+        setUrl(objectURL)
+      } catch (e) {
+        if (!cancelled) setError(`PDF preview unavailable. ${String(e)}`)
+      }
+    }
+    void render()
+    return () => {
+      cancelled = true
+      if (objectURL) URL.revokeObjectURL(objectURL)
+    }
+  }, [html])
+  if (error) return <p role="alert">{error}</p>
+  if (!url) return <p role="status">Preparing PDF pages…</p>
+  return (
+    <iframe
+      title="Printable trip receipt"
+      src={`${url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+    />
   )
 }
 function ReceiptViewer({ src, name, onClose }: { src: string; name: string; onClose: () => void }) {
@@ -281,7 +329,9 @@ export default function App() {
       0
     ) / 100
   const reviewed = receipts.filter((r) => r.reviewed && valid(r)).length
-  const missingProfile = Object.values(data.profile).some((v) => !v.trim())
+  const missingProfile = (['organization', 'email', 'address', 'city', 'account'] as const).some(
+    (key) => !data.profile[key].trim()
+  )
   const ready =
     !!trip &&
     trip.drivers.length > 0 &&
@@ -839,11 +889,7 @@ export default function App() {
                             : ''}
                         </div>
                       )}
-                      <iframe
-                        title="Printable trip receipt"
-                        srcDoc={documentHTML(trip, data)}
-                        sandbox=""
-                      />
+                      <PDFPreview html={documentHTML(trip, data)} />
                     </div>
                   ) : (
                     <div className={`workspace${receipt ? ' inspecting' : ''}`}>
@@ -1072,6 +1118,71 @@ export default function App() {
             <section className="settings">
               <h1>Club profile</h1>
               <p>These details appear on every trip receipt. Changes save automatically.</p>
+              <div className="profile-watermark-upload">
+                {data.profile.icon && (
+                  <img src={data.profile.icon} alt="Current receipt watermark" />
+                )}
+                <label className="field">
+                  <span>Receipt watermark (optional)</span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    aria-describedby="profile-watermark-help"
+                    onChange={async (event) => {
+                      const file = event.currentTarget.files?.[0]
+                      event.currentTarget.value = ''
+                      if (!file) return
+                      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+                        setMessage('Choose a PNG, JPEG, or WebP image for the receipt watermark.')
+                        return
+                      }
+                      if (file.size > 5 * 1024 * 1024) {
+                        setMessage('The receipt watermark must be 5 MB or smaller.')
+                        return
+                      }
+                      try {
+                        const image = await createImageBitmap(file)
+                        const scale = Math.min(1, 1200 / Math.max(image.width, image.height))
+                        const canvas = document.createElement('canvas')
+                        canvas.width = Math.max(1, Math.round(image.width * scale))
+                        canvas.height = Math.max(1, Math.round(image.height * scale))
+                        const context = canvas.getContext('2d', { alpha: true })
+                        if (!context) throw new Error('Image processing unavailable')
+                        context.clearRect(0, 0, canvas.width, canvas.height)
+                        context.drawImage(image, 0, 0, canvas.width, canvas.height)
+                        image.close()
+                        const icon = canvas.toDataURL('image/png')
+                        setData((current) => ({
+                          ...current,
+                          profile: { ...current.profile, icon }
+                        }))
+                        setMessage('Receipt watermark updated.')
+                      } catch {
+                        setMessage(
+                          'This image could not be opened. Try another PNG, JPEG, or WebP image.'
+                        )
+                      }
+                    }}
+                  />
+                  <small id="profile-watermark-help">
+                    PNG, JPEG, or WebP, up to 5 MB. Appears faintly behind the content on every PDF
+                    page.
+                  </small>
+                </label>
+                {data.profile.icon && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setData((current) => ({
+                        ...current,
+                        profile: { ...current.profile, icon: undefined }
+                      }))
+                    }
+                  >
+                    Remove watermark
+                  </button>
+                )}
+              </div>
               <div className="form-grid">
                 {(
                   [

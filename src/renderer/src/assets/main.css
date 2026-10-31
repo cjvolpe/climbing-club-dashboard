@@ -534,6 +534,30 @@ td {
 .inspector .muted {
   line-height: 1.6;
 }
+.profile-watermark-upload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+}
+.profile-watermark-upload > img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  background: transparent;
+}
+.profile-watermark-upload .field {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.profile-watermark-upload input {
+  max-width: 100%;
+}
+.profile-watermark-upload small {
+  color: var(--muted);
+  line-height: 1.5;
+}
 .settings {
   max-width: 800px;
   padding: 14px 4px 50px;

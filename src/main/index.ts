@@ -40,6 +40,26 @@ async function save(data: Data): Promise<void> {
     }
   }
 }
+async function renderPDF(html: string): Promise<Buffer> {
+  const source = join(app.getPath('temp'), `treasury-pdf-${randomUUID()}.html`)
+  const print = new BrowserWindow({
+    show: false,
+    webPreferences: { sandbox: true, javascript: false }
+  })
+  try {
+    // Embedded fonts and watermark images can exceed Chromium's data URL limit.
+    await writeFile(source, html, 'utf8')
+    await print.loadFile(source)
+    return await print.webContents.printToPDF({
+      printBackground: true,
+      pageSize: 'Letter',
+      margins: { top: 0.5, bottom: 0.5, left: 0.5, right: 0.5 }
+    })
+  } finally {
+    print.destroy()
+    await unlink(source).catch(() => {})
+  }
+}
 function createWindow(): void {
   const win = new BrowserWindow({
     width: 1500,
@@ -48,7 +68,11 @@ function createWindow(): void {
     minHeight: 600,
     backgroundColor: '#0e1b2a',
     autoHideMenuBar: true,
-    webPreferences: { preload: join(__dirname, '../preload/index.js'), sandbox: false }
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false,
+      plugins: true
+    }
   })
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
   if (is.dev && process.env.ELECTRON_RENDERER_URL) win.loadURL(process.env.ELECTRON_RENDERER_URL)
@@ -166,28 +190,44 @@ app.whenReady().then(async () => {
           : 'image/jpeg'
     return `data:${mime};base64,${(await readFile(path)).toString('base64')}`
   })
+  ipcMain.handle('treasury:preview-pdf', async (_, html: string) =>
+    (await renderPDF(html)).toString('base64')
+  )
   ipcMain.handle('treasury:pdf', async (_, html: string, name: string) => {
-    const choice = await dialog.showSaveDialog({
+    let choice = await dialog.showSaveDialog({
       defaultPath: `${name}.pdf`,
       filters: [{ name: 'PDF', extensions: ['pdf'] }]
     })
     if (choice.canceled || !choice.filePath) return false
-    const print = new BrowserWindow({
-      show: false,
-      webPreferences: { sandbox: true, javascript: false }
-    })
-    try {
-      await print.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`)
-      const pdf = await print.webContents.printToPDF({
-        printBackground: true,
-        pageSize: 'Letter',
-        margins: { top: 0.5, bottom: 0.5, left: 0.5, right: 0.5 }
-      })
-      await writeFile(choice.filePath, pdf)
-      return true
-    } finally {
-      print.destroy()
+    const pdf = await renderPDF(html)
+    while (!choice.canceled && choice.filePath) {
+      try {
+        await writeFile(choice.filePath, pdf)
+        return true
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException).code
+        if (code !== 'EBUSY' && code !== 'EACCES' && code !== 'EPERM') throw error
+        const result = await dialog.showMessageBox({
+          type: 'warning',
+          title: 'Unable to save PDF',
+          message: `Cannot write to ${basename(choice.filePath)}.`,
+          detail:
+            'The file may be open in a PDF viewer or another application, or the folder may not allow writing. Close the file and retry, or choose another filename or folder.',
+          buttons: ['Retry', 'Save As…', 'Cancel'],
+          defaultId: 0,
+          cancelId: 2,
+          noLink: true
+        })
+        if (result.response === 2) return false
+        if (result.response === 1) {
+          choice = await dialog.showSaveDialog({
+            defaultPath: choice.filePath,
+            filters: [{ name: 'PDF', extensions: ['pdf'] }]
+          })
+        }
+      }
     }
+    return false
   })
   createWindow()
   app.on('activate', () => {

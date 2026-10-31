@@ -24,6 +24,7 @@ export interface Trip {
   number: string
 }
 export interface Profile {
+  icon?: string
   organization: string
   email: string
   address: string
@@ -45,4 +46,5 @@ export interface TreasuryAPI {
   >
   readReceipt(file: string): Promise<string>
   exportPDF(html: string, name: string): Promise<boolean>
+  previewPDF(html: string): Promise<string>
 }
