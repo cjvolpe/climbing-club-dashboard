@@ -29,6 +29,7 @@ function Icon({ name }: { name: string }) {
     profile: 'M4 21v-3a8 8 0 0 1 16 0v3 M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0',
     storage: 'M4 6c0-4 16-4 16 0s-16 4-16 0v12c0 4 16 4 16 0V6 M4 12c0 4 16 4 16 0',
     plus: 'M12 4v16 M4 12h16',
+    minus: 'M4 12h16',
     pdf: 'M6 3h8l4 4v14H6z M14 3v5h4 M9 12h6 M9 16h6',
     mountain: 'M2 20 9 6l4 7 3-5 6 12H2 M6 12l3 2 3-2',
     close: 'M5 5l14 14 M19 5 5 19',
@@ -139,12 +140,94 @@ function documentHTML(trip: Trip, data: Data) {
           money(sum(d)) +
           '</th></tr></tfoot></table><div class="signature">' +
           esc(d.name) +
-          '</div><small>Generated name in cursive; not a captured signature.</small></section>'
+          '</div><small>Signature</small></section>'
       )
       .join('') +
     '<h2>Trip total: ' +
     money(trip.drivers.reduce((n, d) => n + sum(d), 0)) +
     '</h2></body></html>'
+  )
+}
+function ReceiptViewer({ src, name, onClose }: { src: string; name: string; onClose: () => void }) {
+  const dialog = useRef<HTMLDialogElement>(null)
+  const [zoom, setZoom] = useState(1)
+  const [size, setSize] = useState({ width: 0, height: 0 })
+  useEffect(() => {
+    if (!size.width || !size.height) return
+    dialog.current?.showModal()
+    return () => dialog.current?.close()
+  }, [size.width, size.height])
+  const changeZoom = (amount: number) =>
+    setZoom((current) => Math.min(4, Math.max(1, Math.round((current + amount) * 100) / 100)))
+  return (
+    <dialog
+      ref={dialog}
+      className="receipt-viewer"
+      aria-label={`Receipt: ${name}`}
+      onCancel={onClose}
+    >
+      <button
+        type="button"
+        className="receipt-viewer-close"
+        aria-label="Close receipt"
+        onClick={onClose}
+      >
+        <Icon name="close" />
+      </button>
+      <div
+        className="receipt-viewer-scroll"
+        onWheel={(event) => {
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault()
+            changeZoom(event.deltaY < 0 ? 0.25 : -0.25)
+          }
+        }}
+      >
+        <div
+          className="receipt-viewer-canvas"
+          style={{
+            width: size.width * zoom,
+            height: size.height * zoom
+          }}
+        >
+          <img
+            src={src}
+            alt={`Original receipt: ${name}`}
+            onLoad={(event) => {
+              const image = event.currentTarget
+              const scale = Math.min(
+                (window.innerWidth - 112) / image.naturalWidth,
+                (window.innerHeight - 176) / image.naturalHeight,
+                1
+              )
+              setSize({ width: image.naturalWidth * scale, height: image.naturalHeight * scale })
+            }}
+          />
+        </div>
+      </div>
+      <div className="receipt-viewer-tools" role="group" aria-label="Receipt zoom">
+        <button
+          type="button"
+          aria-label="Zoom out"
+          disabled={zoom === 1}
+          onClick={() => changeZoom(-0.25)}
+        >
+          <Icon name="minus" />
+        </button>
+        <output aria-live="polite">{Math.round(zoom * 100)}%</output>
+        <button
+          type="button"
+          aria-label="Zoom in"
+          disabled={zoom === 4}
+          onClick={() => changeZoom(0.25)}
+        >
+          <Icon name="plus" />
+        </button>
+        <button type="button" onClick={() => setZoom(1)}>
+          Fit
+        </button>
+      </div>
+    </dialog>
   )
 }
 export default function App() {
@@ -161,7 +244,8 @@ export default function App() {
   const [draft, setDraft] = useState({ name: '', start: '', end: '', location: '', count: '1' })
   const [preview, setPreview] = useState(false)
   const [image, setImage] = useState('')
-  const [zoomed, setZoomed] = useState(false)
+  const [viewerOpen, setViewerOpen] = useState(false)
+  const receiptTrigger = useRef<HTMLButtonElement>(null)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [saveState, setSaveState] = useState('Loading records…')
@@ -218,7 +302,7 @@ export default function App() {
   }, [data, loaded])
   useEffect(() => {
     setImage('')
-    setZoomed(false)
+    setViewerOpen(false)
     let active = true
     if (receipt?.file && window.api)
       window.api
@@ -717,26 +801,31 @@ export default function App() {
                           </div>
                           <button
                             type="button"
-                            className="text-button zoom-control"
+                            className="receipt-image"
+                            ref={receiptTrigger}
                             disabled={!image}
-                            aria-pressed={zoomed}
-                            onClick={() => setZoomed(!zoomed)}
-                          >
-                            {zoomed ? 'Fit original to view' : 'Enlarge original'}
-                          </button>
-                          <section
-                            className={`receipt-image${zoomed ? ' zoomed' : ''}`}
-                            tabIndex={zoomed ? 0 : undefined}
-                            aria-label="Original receipt; enlarge and scroll to inspect"
+                            aria-label={`Enlarge receipt: ${receipt.name}`}
+                            aria-haspopup="dialog"
+                            onClick={() => setViewerOpen(true)}
                           >
                             {image ? (
                               <div className="original-image">
                                 <img src={image} alt={`Original receipt: ${receipt.name}`} />
                               </div>
                             ) : (
-                              <p>Loading original receipt…</p>
+                              <span>Loading original receipt?</span>
                             )}
-                          </section>
+                          </button>
+                          {viewerOpen && image && (
+                            <ReceiptViewer
+                              src={image}
+                              name={receipt.name}
+                              onClose={() => {
+                                setViewerOpen(false)
+                                requestAnimationFrame(() => receiptTrigger.current?.focus())
+                              }}
+                            />
+                          )}
                           <div className="manual-note">
                             {receipt.totalParseError || receipt.priceParseError
                               ? 'Enter the missing amounts, then confirm them against the original.'

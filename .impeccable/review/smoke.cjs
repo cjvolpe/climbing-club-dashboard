@@ -89,12 +89,17 @@ app.whenReady().then(async () => {
     await sleep(300)
     const saved = await js('window.api.load()')
     assert.equal(saved.data.trips[0].drivers[0].receipts[0].reviewed, true)
-    await js("document.querySelector('.zoom-control').click()")
-    assert.equal(
-      await js("document.querySelector('.receipt-image').classList.contains('zoomed')"),
-      true
-    )
-    await js("document.querySelector('.zoom-control').click()")
+    await js("document.querySelector('.receipt-image').click()")
+    await sleep(100)
+    assert.equal(await js("document.querySelector('.receipt-viewer').open"), true)
+    await js("document.querySelector('[aria-label=\"Zoom in\"]').click()")
+    assert.equal(await js("document.querySelector('.receipt-viewer output').value"), '125%')
+    await sleep(150)
+    await fs.writeFile(path.join(__dirname, 'receipt-viewer.png'), (await win.webContents.capturePage()).toPNG())
+    await js("document.querySelector('.receipt-viewer-close').click()")
+    assert.equal(await js("document.querySelector('.receipt-viewer')"), null)
+    await sleep(80)
+    assert.equal(await js("document.activeElement.className"), 'receipt-image')
     win.setMinimumSize(0, 0)
     async function capture(width, height, name, full = true) {
       win.setContentSize(width, height)
