@@ -4,6 +4,7 @@ import { basename, extname, isAbsolute, join, relative, resolve } from 'node:pat
 import { is } from '@electron-toolkit/utils'
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import type { Data, TreasuryAPI } from '../preload/types'
+import { renderPDF } from './pdf'
 import { recognizeReceipt } from './receipt-ocr'
 
 let folder: string
@@ -38,26 +39,6 @@ async function save(data: Data): Promise<void> {
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
     }
-  }
-}
-async function renderPDF(html: string): Promise<Buffer> {
-  const source = join(app.getPath('temp'), `treasury-pdf-${randomUUID()}.html`)
-  const print = new BrowserWindow({
-    show: false,
-    webPreferences: { sandbox: true, javascript: false }
-  })
-  try {
-    // Embedded fonts and watermark images can exceed Chromium's data URL limit.
-    await writeFile(source, html, 'utf8')
-    await print.loadFile(source)
-    return await print.webContents.printToPDF({
-      printBackground: true,
-      pageSize: 'Letter',
-      margins: { top: 0.5, bottom: 0.5, left: 0.5, right: 0.5 }
-    })
-  } finally {
-    print.destroy()
-    await unlink(source).catch(() => {})
   }
 }
 function createWindow(): void {
