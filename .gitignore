@@ -2,5 +2,9 @@ node_modules
 dist
 out
 .DS_Store
-.eslintcache
 *.log*
+
+# Local Impeccable settings, live sessions, and downloaded binaries
+.impeccable/config.local.json
+.impeccable/live/
+.agents/skills/impeccable/scripts/bin/

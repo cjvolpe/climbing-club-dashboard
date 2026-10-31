@@ -1,6 +1,7 @@
-import { resolve } from 'path'
-import { defineConfig } from 'electron-vite'
+import { resolve } from 'node:path'
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { defineConfig } from 'electron-vite'
 
 export default defineConfig({
   main: {},
@@ -11,6 +12,6 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
-    plugins: [react()]
+    plugins: [react(), tailwindcss()]
   }
 })
