@@ -183,6 +183,7 @@ main {
 }
 .trip-switch {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 14px;
   margin-bottom: 23px;
@@ -351,6 +352,21 @@ td {
 .driver-actions select {
   grid-column: 2;
   justify-self: center;
+}
+.delete-trip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border-color: transparent;
+  background: transparent;
+}
+.delete-trip:hover:not(:disabled),
+.delete-trip:focus-visible:not(:disabled) {
+  color: #f2aaa4;
+  background: #512d34;
 }
 .delete-driver {
   display: inline-flex;
@@ -888,4 +904,24 @@ footer span:first-child {
   color: #f0b9a6;
   opacity: 1;
   font-size: 0.8rem;
+}
+
+.trips-overview {
+  margin-bottom: 26px;
+}
+.trips-overview table {
+  min-width: 720px;
+}
+.trips-overview .trip-link {
+  justify-content: flex-start;
+  text-align: left;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+.trip-dates {
+  white-space: nowrap;
+  color: var(--muted);
+}
+.overview-note {
+  padding: 0 18px 16px;
 }

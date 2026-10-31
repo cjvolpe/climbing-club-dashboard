@@ -10,6 +10,23 @@ const money = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
 const sum = (d: Driver) =>
   d.receipts.reduce((n, r) => n + Math.round((Number(r.total) || 0) * 100), 0) / 100
+const averageGasPrice = (receipts: Receipt[]) => {
+  const prices = receipts
+    .filter((r) => !r.priceParseError && /^\d+(\.\d{1,3})?$/.test(r.price))
+    .map((r) => Number(r.price))
+    .filter((price) => Number.isFinite(price) && price > 0)
+  return prices.length ? prices.reduce((total, price) => total + price, 0) / prices.length : null
+}
+const gasPrice = (price: number | null) => (price === null ? '\u2014' : `$${price.toFixed(3)}`)
+const tripDates = (trip: Trip) => {
+  const format = (date: string) =>
+    new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  return format(trip.start) + (trip.start === trip.end ? '' : ` \u2014 ${format(trip.end)}`)
+}
 const valid = (r: Receipt) =>
   /^\d+(\.\d{1,2})?$/.test(r.total) &&
   Number.isFinite(Number(r.total)) &&
@@ -250,17 +267,19 @@ export default function App() {
   const [message, setMessage] = useState('')
   const [saveState, setSaveState] = useState('Loading records…')
   const serial = useRef(Promise.resolve())
-  const trip = data.trips.find((t) => t.id === tripId) || data.trips[0]
+  const trip = data.trips.find((t) => t.id === tripId)
   const driver = trip?.drivers.find((d) => d.receipts.some((r) => r.id === selected))
   const receipt = driver?.receipts.find((r) => r.id === selected)
   const receipts = trip?.drivers.flatMap((d) => d.receipts) || []
-  const recordedPrices = receipts
-    .filter((r) => !r.priceParseError && /^\d+(\.\d{1,3})?$/.test(r.price))
-    .map((r) => Number(r.price))
-    .filter((price) => Number.isFinite(price) && price > 0)
-  const averagePrice = recordedPrices.length
-    ? recordedPrices.reduce((total, price) => total + price, 0) / recordedPrices.length
-    : null
+  const averagePrice = averageGasPrice(receipts)
+  const allReceipts = data.trips.flatMap((t) => t.drivers.flatMap((d) => d.receipts))
+  const overallAverage = averageGasPrice(allReceipts)
+  const overallTotal =
+    data.trips.reduce(
+      (total, t) =>
+        total + t.drivers.reduce((subtotal, d) => subtotal + Math.round(sum(d) * 100), 0),
+      0
+    ) / 100
   const reviewed = receipts.filter((r) => r.reviewed && valid(r)).length
   const missingProfile = Object.values(data.profile).some((v) => !v.trim())
   const ready =
@@ -341,6 +360,41 @@ export default function App() {
         ...d,
         receipts: d.receipts.map((r) => (r.id === receipt.id ? { ...r, ...patch } : r))
       }))
+  }
+  async function deleteTrip(target: Trip) {
+    if (busy) return
+    setBusy(true)
+    try {
+      const confirmed =
+        typeof window.api?.confirmDeleteTrip === 'function'
+          ? await window.api.confirmDeleteTrip(target.name)
+          : window.confirm(
+              `Delete ${target.name} and its drivers and receipts? Continue to final confirmation?`
+            ) &&
+            window.confirm(
+              `Permanently delete ${target.name} and all its receipt data and images? This cannot be undone.`
+            )
+      if (!confirmed) return
+      setData((current) => ({
+        ...current,
+        trips: current.trips.filter((t) => t.id !== target.id)
+      }))
+      if (tripId === target.id) {
+        setTripId('')
+        setSelected('')
+        setImage('')
+        setViewerOpen(false)
+        setPreview(false)
+        setEditor(false)
+        setCollapsed([])
+        setQuery('')
+        setFilter(false)
+      }
+    } catch (error) {
+      setMessage(`Could not delete trip. ${String(error)}`)
+    } finally {
+      setBusy(false)
+    }
   }
   async function deleteDriver(d: Driver, index: number) {
     if (busy) return
@@ -442,6 +496,10 @@ export default function App() {
               className={page === p ? 'nav active' : 'nav'}
               onClick={() => {
                 setPage(p)
+                if (p === 'Trips') {
+                  setTripId('')
+                  setEditor(false)
+                }
                 setSelected('')
                 setPreview(false)
               }}
@@ -480,24 +538,56 @@ export default function App() {
           {loaded && page === 'Trips' && (
             <>
               <div className="trip-switch">
-                <label>
-                  Trip
-                  <select
-                    value={trip?.id || ''}
-                    onChange={(e) => {
-                      setTripId(e.target.value)
+                {trip ? (
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => {
+                      setTripId('')
                       setSelected('')
                       setPreview(false)
+                      setEditor(false)
                     }}
                   >
-                    {!data.trips.length && <option>No trips yet</option>}
-                    {data.trips.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                    <Icon name="back" /> All trips
+                  </button>
+                ) : (
+                  <h1>Trips</h1>
+                )}
+                {trip && (
+                  <label>
+                    Trip
+                    <select
+                      value={trip.id}
+                      onChange={(e) => {
+                        setTripId(e.target.value)
+                        setSelected('')
+                        setPreview(false)
+                        setEditor(false)
+                        setQuery('')
+                        setFilter(false)
+                      }}
+                    >
+                      {data.trips.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {trip && (
+                  <button
+                    type="button"
+                    className="delete-trip"
+                    aria-label={`Delete trip: ${trip.name}`}
+                    title="Delete trip"
+                    disabled={busy}
+                    onClick={() => deleteTrip(trip)}
+                  >
+                    <Icon name="trash" />
+                  </button>
+                )}
                 <button
                   type="button"
                   className="text-button"
@@ -562,22 +652,110 @@ export default function App() {
                   </div>
                 </form>
               )}
-              {!trip ? (
-                <div className="empty">
-                  <div className="empty-symbol">
-                    <Icon name="trips" />
+              {!trip && data.trips.length > 0 && (
+                <section className="ledger trips-overview" aria-label="Trips overview">
+                  <div className="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th scope="col">Trip name</th>
+                          <th scope="col">Trip dates</th>
+                          <th scope="col" className="number">
+                            Drivers
+                          </th>
+                          <th scope="col" className="number">
+                            Total gas cost
+                          </th>
+                          <th scope="col" className="number">
+                            Avg price / gal
+                          </th>
+                          <th scope="col">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.trips.map((t) => (
+                          <tr key={t.id}>
+                            <td>
+                              <button
+                                type="button"
+                                className="text-button trip-link"
+                                onClick={() => {
+                                  setTripId(t.id)
+                                  setSelected('')
+                                  setPreview(false)
+                                  setEditor(false)
+                                  setQuery('')
+                                  setFilter(false)
+                                }}
+                              >
+                                {t.name}
+                              </button>
+                            </td>
+                            <td className="trip-dates">{tripDates(t)}</td>
+                            <td className="number">{t.drivers.length}</td>
+                            <td className="number">
+                              {money(t.drivers.reduce((total, d) => total + sum(d), 0))}
+                            </td>
+                            <td className="number">
+                              {gasPrice(averageGasPrice(t.drivers.flatMap((d) => d.receipts)))}
+                            </td>
+                            <td>
+                              <button
+                                type="button"
+                                className="delete-trip"
+                                disabled={busy}
+                                aria-label={`Delete trip: ${t.name}`}
+                                title="Delete trip"
+                                onClick={() => deleteTrip(t)}
+                              >
+                                <Icon name="trash" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <h1>Every trip starts here.</h1>
-                  <p>
-                    Create a trip, collect each driver’s gas receipts, and turn the reviewed
-                    expenses into a printable reimbursement record.
+                  <div className="ledger-summary">
+                    <span>
+                      {data.trips.length} {data.trips.length === 1 ? 'trip' : 'trips'}
+                    </span>
+                    <div>
+                      <span className="summary-amount">
+                        <span>Average price / gallon</span>
+                        <strong>{gasPrice(overallAverage)}</strong>
+                      </span>
+                      <span className="summary-amount">
+                        <span>Total gas cost</span>
+                        <strong>{money(overallTotal)}</strong>
+                      </span>
+                    </div>
+                  </div>
+                  <p className="overview-note muted">
+                    Average of recorded receipt prices. Missing or invalid prices are excluded.
                   </p>
-                  <button type="button" className="primary" onClick={() => setEditor(true)}>
-                    <Icon name="plus" />
-                    Create your first trip
-                  </button>
-                  <p className="muted">Works offline. Original receipts stay with your records.</p>
-                </div>
+                </section>
+              )}
+              {!trip ? (
+                data.trips.length === 0 ? (
+                  <div className="empty">
+                    <div className="empty-symbol">
+                      <Icon name="trips" />
+                    </div>
+                    <h1>Every trip starts here.</h1>
+                    <p>
+                      Create a trip, collect each driver’s gas receipts, and turn the reviewed
+                      expenses into a printable reimbursement record.
+                    </p>
+                    <button type="button" className="primary" onClick={() => setEditor(true)}>
+                      <Icon name="plus" />
+                      Create your first trip
+                    </button>
+                    <p className="muted">
+                      Works offline. Original receipts stay with your records.
+                    </p>
+                  </div>
+                ) : null
               ) : (
                 <>
                   <div className="trip-header">
@@ -774,7 +952,9 @@ export default function App() {
                           <div>
                             <span className="summary-amount">
                               <span>Avg cost / gal</span>
-                              <strong>{averagePrice === null ? '—' : `$${averagePrice.toFixed(3)}`}</strong>
+                              <strong>
+                                {averagePrice === null ? '—' : `$${averagePrice.toFixed(3)}`}
+                              </strong>
                             </span>
                             <span className="summary-amount">
                               <span>Trip total</span>

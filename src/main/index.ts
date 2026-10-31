@@ -69,6 +69,28 @@ app.whenReady().then(async () => {
     }
   })
   ipcMain.handle('treasury:save', (_, data: Data) => save(data))
+  ipcMain.handle('treasury:confirm-delete-trip', async (event, name: string) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    for (const final of [false, true]) {
+      const options = {
+        type: 'warning' as const,
+        buttons: ['Cancel', final ? 'Permanently delete trip' : 'Continue to final confirmation'],
+        defaultId: 0,
+        cancelId: 0,
+        title: final ? 'Final confirmation' : 'Delete trip',
+        message: final ? `Permanently delete ${name}?` : `Delete ${name}?`,
+        detail: final
+          ? 'This cannot be undone. The trip, all drivers, receipt data, and stored receipt images will be removed from this workspace.'
+          : 'Deleting this trip also removes its drivers and receipts. You will need to confirm once more before anything is deleted.',
+        noLink: true
+      }
+      const result = win
+        ? await dialog.showMessageBox(win, options)
+        : await dialog.showMessageBox(options)
+      if (result.response !== 1) return false
+    }
+    return true
+  })
   ipcMain.handle('treasury:confirm-delete-driver', async (event, name: string) => {
     const win = BrowserWindow.fromWebContents(event.sender)
     const options = {
