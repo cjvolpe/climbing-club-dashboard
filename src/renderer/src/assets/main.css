@@ -805,3 +805,12 @@ footer span:first-child {
   display: block;
   object-fit: initial;
 }
+
+.field input[aria-invalid="true"] {
+  border-color: #e6a38d;
+}
+.field input[aria-invalid="true"]::placeholder {
+  color: #f0b9a6;
+  opacity: 1;
+  font-size: 0.8rem;
+}

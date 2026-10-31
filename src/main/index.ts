@@ -3,7 +3,8 @@ import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, extname, isAbsolute, join, relative, resolve } from 'node:path'
 import { is } from '@electron-toolkit/utils'
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
-import type { Data } from '../preload/types'
+import type { Data, TreasuryAPI } from '../preload/types'
+import { recognizeReceipt } from './receipt-ocr'
 
 let folder: string
 const config = () => join(app.getPath('userData'), 'treasury-storage.json')
@@ -67,13 +68,25 @@ app.whenReady().then(async () => {
     })
     if (choice.canceled) return []
     await mkdir(join(folder, 'receipts'), { recursive: true })
-    return Promise.all(
-      choice.filePaths.map(async (source) => {
-        const file = join('receipts', randomUUID() + extname(source).toLowerCase())
-        await copyFile(source, join(folder, file))
-        return { name: basename(source), file }
+    const receipts: Awaited<ReturnType<TreasuryAPI['importReceipts']>> = []
+    for (const source of choice.filePaths) {
+      const file = join('receipts', randomUUID() + extname(source).toLowerCase())
+      await copyFile(source, join(folder, file))
+      let amounts = { total: '', price: '' }
+      try {
+        amounts = await recognizeReceipt(await readFile(join(folder, file)))
+      } catch {
+        // Preserve the original and allow manual entry even when OCR fails.
+      }
+      receipts.push({
+        name: basename(source),
+        file,
+        ...amounts,
+        totalParseError: !amounts.total,
+        priceParseError: !amounts.price
       })
-    )
+    }
+    return receipts
   })
   ipcMain.handle('treasury:read', async (_, file: string) => {
     const path = resolve(folder, file)

@@ -4,6 +4,8 @@ export interface Receipt {
   file?: string
   total: string
   price: string
+  totalParseError?: boolean
+  priceParseError?: boolean
   reviewed: boolean
 }
 export interface Driver {
@@ -36,7 +38,9 @@ export interface TreasuryAPI {
   load(): Promise<{ data: Data | null; folder: string }>
   save(data: Data): Promise<void>
   chooseFolder(): Promise<string | null>
-  importReceipts(): Promise<{ name: string; file: string }[]>
+  importReceipts(): Promise<
+    Pick<Receipt, 'name' | 'file' | 'total' | 'price' | 'totalParseError' | 'priceParseError'>[]
+  >
   readReceipt(file: string): Promise<string>
   exportPDF(html: string, name: string): Promise<boolean>
 }

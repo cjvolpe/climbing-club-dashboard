@@ -73,6 +73,10 @@ app.whenReady().then(async () => {
     dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [source] })
     const imported = await js('window.api.importReceipts()')
     assert.equal(imported.length, 1)
+    assert.equal(imported[0].total, '42.50')
+    assert.equal(imported[0].price, '3.459')
+    assert.equal(imported[0].totalParseError, false)
+    assert.equal(imported[0].priceParseError, false)
     fixture.trips[0].drivers[0].receipts[0].file = imported[0].file
     await js('window.api.save(' + JSON.stringify(fixture) + ')')
     await win.webContents.reload()
@@ -80,7 +84,7 @@ app.whenReady().then(async () => {
     assert.match(await js('document.body.innerText'), /42.50/)
     await js("document.querySelector('.receipt-row button').click()")
     await sleep(150)
-    assert.match(await js('document.body.innerText'), /Manual review required/)
+    assert.match(await js('document.body.innerText'), /Needs confirmation/)
     await js("document.querySelector('.review-button').click()")
     await sleep(300)
     const saved = await js('window.api.load()')
@@ -146,6 +150,23 @@ app.whenReady().then(async () => {
     await sleep(100)
     assert.match(await js('document.body.innerText'), /Workspace folder/)
     await assert.rejects(js("window.api.readReceipt('../treasury.json')"))
+    fixture.trips[0].drivers[0].receipts[0].total = ''
+    fixture.trips[0].drivers[0].receipts[0].price = ''
+    fixture.trips[0].drivers[0].receipts[0].totalParseError = true
+    fixture.trips[0].drivers[0].receipts[0].priceParseError = true
+    await js('window.api.save(' + JSON.stringify(fixture) + ')')
+    await win.webContents.reload()
+    await sleep(500)
+    await js("document.querySelector('.receipt-row button').click()")
+    await sleep(100)
+    assert.equal(
+      await js(
+        'document.querySelectorAll(\'input[placeholder="The receipt could not be parsed"]\').length'
+      ),
+      2
+    )
+    assert.equal(await js("document.querySelector('.review-button').disabled"), true)
+    await capture(390, 844, 'ocr-errors.png')
     console.log(
       'PASS: empty state, setup form, saved trip reload, review persistence, mobile overflow, preview readiness, real PDF export, profile, storage, traversal rejection.'
     )

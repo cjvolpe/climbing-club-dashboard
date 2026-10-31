@@ -14,6 +14,7 @@ const valid = (r: Receipt) =>
   /^\d+(\.\d{1,2})?$/.test(r.total) &&
   Number.isFinite(Number(r.total)) &&
   Number(r.total) > 0 &&
+  /^\d+(\.\d{1,3})?$/.test(r.price) &&
   Number.isFinite(Number(r.price)) &&
   Number(r.price) > 0
 const id = () => crypto.randomUUID()
@@ -55,19 +56,25 @@ function Field({
   value,
   onChange,
   type = 'text',
-  required = false
+  required = false,
+  error = false
 }: {
   label: string
   value: string
   onChange: (v: string) => void
   type?: string
   required?: boolean
+  error?: boolean
 }) {
   return (
     <label className="field">
       <span>{label}</span>
       <input
-        type={type}
+        type={error ? 'text' : type}
+        inputMode={type === 'number' ? 'decimal' : undefined}
+        placeholder={error ? 'The receipt could not be parsed' : undefined}
+        aria-invalid={error || undefined}
+        title={error ? 'The receipt could not be parsed. Enter the correct amount.' : undefined}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
@@ -251,7 +258,7 @@ export default function App() {
     setBusy(true)
     try {
       const files = await window.api.importReceipts()
-      const items = files.map((f) => ({ ...f, id: id(), total: '', price: '', reviewed: false }))
+      const items = files.map((f) => ({ ...f, id: id(), reviewed: false }))
       if (items.length) {
         updateDriver(did, (d) => ({ ...d, receipts: [...d.receipts, ...items] }))
         setSelected(items[0].id)
@@ -731,19 +738,39 @@ export default function App() {
                             )}
                           </section>
                           <div className="manual-note">
-                            Manual review required. Automatic extraction is not configured.
+                            {receipt.totalParseError || receipt.priceParseError
+                              ? 'Enter the missing amounts, then confirm them against the original.'
+                              : receipt.reviewed
+                                ? 'Amounts confirmed against the original.'
+                                : 'Needs confirmation. Check both amounts against the original.'}
                           </div>
                           <Field
                             label="Total cost (USD)"
                             type="number"
                             value={receipt.total}
-                            onChange={(total) => updateReceipt({ total, reviewed: false })}
+                            error={receipt.totalParseError}
+                            required
+                            onChange={(total) =>
+                              updateReceipt({
+                                total,
+                                totalParseError: !total.trim(),
+                                reviewed: false
+                              })
+                            }
                           />
                           <Field
                             label="Price per gallon (USD)"
                             type="number"
                             value={receipt.price}
-                            onChange={(price) => updateReceipt({ price, reviewed: false })}
+                            error={receipt.priceParseError}
+                            required
+                            onChange={(price) =>
+                              updateReceipt({
+                                price,
+                                priceParseError: !price.trim(),
+                                reviewed: false
+                              })
+                            }
                           />
                           <label className="field">
                             <span>Reimbursement method</span>
@@ -765,7 +792,7 @@ export default function App() {
                             onClick={() => updateReceipt({ reviewed: !receipt.reviewed })}
                           >
                             <Icon name="check" />
-                            {receipt.reviewed ? 'Reviewed · reopen review' : 'Mark as reviewed'}
+                            {receipt.reviewed ? 'Reviewed · reopen review' : 'Confirm amounts'}
                           </button>
                           <p className="muted">
                             Check both amounts against the original before marking this receipt
