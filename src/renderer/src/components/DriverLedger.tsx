@@ -22,6 +22,7 @@ type DriverLedgerProps = Pick<
   | 'updateTrip'
   | 'updateDriver'
   | 'deleteDriver'
+  | 'deleteReceipt'
   | 'importFiles'
 > & { trip: Trip }
 
@@ -42,6 +43,7 @@ export default function DriverLedger({
   updateTrip,
   updateDriver,
   deleteDriver,
+  deleteReceipt,
   importFiles
 }: DriverLedgerProps) {
   return (
@@ -105,6 +107,7 @@ export default function DriverLedger({
                   onChange={(patch) => updateDriver(d.id, (current) => ({ ...current, ...patch }))}
                   onImport={() => importFiles(d.id)}
                   onDelete={() => deleteDriver(d, index)}
+                  onDeleteReceipt={(receipt) => deleteReceipt(d, receipt)}
                   busy={busy}
                 />
               )

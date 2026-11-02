@@ -66,6 +66,24 @@ app.whenReady().then(async () => {
     }
   })
   ipcMain.handle('treasury:save', (_, data: Data) => save(data))
+  ipcMain.handle('treasury:confirm-delete-receipt', async (event, name: string) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const options = {
+      type: 'warning' as const,
+      buttons: ['Cancel', 'Remove receipt'],
+      defaultId: 0,
+      cancelId: 0,
+      title: 'Remove receipt',
+      message: `Remove ${name} from this driver?`,
+      detail:
+        'This permanently removes the receipt data and stored image. This cannot be undone.',
+      noLink: true
+    }
+    const result = win
+      ? await dialog.showMessageBox(win, options)
+      : await dialog.showMessageBox(options)
+    return result.response === 1
+  })
   ipcMain.handle('treasury:confirm-delete-trip', async (event, name: string) => {
     const win = BrowserWindow.fromWebContents(event.sender)
     for (const final of [false, true]) {

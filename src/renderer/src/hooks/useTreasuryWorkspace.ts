@@ -122,6 +122,32 @@ export function useTreasuryWorkspace() {
         receipts: d.receipts.map((r) => (r.id === receipt.id ? { ...r, ...patch } : r))
       }))
   }
+  async function deleteReceipt(targetDriver: Driver, targetReceipt: Receipt) {
+    if (busy) return
+    setBusy(true)
+    try {
+      const confirmed = window.api
+        ? await window.api.confirmDeleteReceipt(targetReceipt.name)
+        : window.confirm(
+            `Remove ${targetReceipt.name} from this driver? The receipt data and stored image will be permanently removed. This cannot be undone.`
+          )
+      if (!confirmed) return
+      updateDriver(targetDriver.id, (current) => ({
+        ...current,
+        receipts: current.receipts.filter((item) => item.id !== targetReceipt.id)
+      }))
+      if (selected === targetReceipt.id) {
+        setSelected('')
+        setImage('')
+        setViewerOpen(false)
+      }
+      requestAnimationFrame(() => document.getElementById(`driver-${targetDriver.id}`)?.focus())
+    } catch (error) {
+      setMessage(`Could not remove receipt. ${String(error)}`)
+    } finally {
+      setBusy(false)
+    }
+  }
   async function deleteTrip(target: Trip) {
     if (busy) return
     setBusy(true)
@@ -292,6 +318,7 @@ export function useTreasuryWorkspace() {
     updateTrip,
     updateDriver,
     updateReceipt,
+    deleteReceipt,
     deleteTrip,
     deleteDriver,
     importFiles,

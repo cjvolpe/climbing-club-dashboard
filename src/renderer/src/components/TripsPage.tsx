@@ -199,6 +199,7 @@ export default function TripsPage({ workspace }: TripsPageProps) {
                 updateTrip={updateTrip}
                 updateDriver={updateDriver}
                 deleteDriver={deleteDriver}
+                deleteReceipt={workspace.deleteReceipt}
                 importFiles={importFiles}
               />
               {receipt && driver && (

@@ -368,7 +368,8 @@ td {
   color: #f2aaa4;
   background: #512d34;
 }
-.delete-driver {
+.delete-driver,
+.receipt-row .delete-receipt {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -378,7 +379,8 @@ td {
   color: #f2aaa4;
   background: transparent;
 }
-.delete-driver:hover:not(:disabled) {
+.delete-driver:hover:not(:disabled),
+.receipt-row .delete-receipt:hover:not(:disabled) {
   background: #512d34;
 }
 .status {
@@ -426,6 +428,12 @@ td {
 .receipt-row svg {
   flex-shrink: 0;
   color: #9ab5d3;
+}
+.receipt-actions {
+  text-align: right;
+}
+.receipt-row .delete-receipt svg {
+  color: currentColor;
 }
 .empty-driver {
   padding: 23px 30px;

@@ -13,6 +13,7 @@ export default function DriverRows({
   onChange,
   onImport,
   onDelete,
+  onDeleteReceipt,
   busy
 }: {
   driver: Driver
@@ -25,6 +26,7 @@ export default function DriverRows({
   onChange: (patch: Partial<Driver>) => void
   onImport: () => void
   onDelete: () => void
+  onDeleteReceipt: (receipt: Receipt) => void
   busy: boolean
 }) {
   return (
@@ -42,6 +44,7 @@ export default function DriverRows({
               <Icon name="back" />
             </button>
             <input
+              id={`driver-${d.id}`}
               aria-label={`Driver ${index + 1} name`}
               placeholder={`Driver ${index + 1} name`}
               value={d.name}
@@ -103,10 +106,22 @@ export default function DriverRows({
               </td>
               <td className="number">{r.total ? formatMoney(Number(r.total)) : '—'}</td>
               <td className="number">{r.price ? `$${Number(r.price).toFixed(3)}` : '—'}</td>
-              <td colSpan={2}>
+              <td>
                 <span className={`status ${r.reviewed ? 'reviewed' : ''}`}>
                   {r.reviewed ? 'Reviewed' : 'Needs review'}
                 </span>
+              </td>
+              <td className="receipt-actions">
+                <button
+                  type="button"
+                  className="delete-receipt"
+                  aria-label={`Remove receipt: ${r.name}`}
+                  title="Remove receipt"
+                  disabled={busy}
+                  onClick={() => onDeleteReceipt(r)}
+                >
+                  <Icon name="trash" />
+                </button>
               </td>
             </tr>
           ))}

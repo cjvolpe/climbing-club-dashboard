@@ -40,6 +40,7 @@ export interface Data {
 export interface TreasuryAPI {
   load(): Promise<{ data: Data | null; folder: string }>
   save(data: Data): Promise<void>
+  confirmDeleteReceipt(name: string): Promise<boolean>
   confirmDeleteDriver(name: string): Promise<boolean>
   confirmDeleteTrip(name: string): Promise<boolean>
   chooseFolder(): Promise<string | null>
