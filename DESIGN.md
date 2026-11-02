@@ -203,7 +203,9 @@ The ledger is a clipped bordered panel; its table, toolbar, and total footer rem
 
 Driver groups expand to reveal receipt rows. Each group carries an editable name, subtotal, status, and reimbursement method. Selected receipt rows use blue-toned fill and an inset accent outline; hover uses a darker toned highlight. Receipt filenames wrap, while numeric cells remain unbroken and right aligned.
 
-The inspector displays the original image before amount fields and the review action. It states that automatic extraction is not configured. Editing an amount reopens review; the action is disabled until amounts are valid. Closing the inspector restores focus to the receipt control. Do not present a generated sample receipt as real source evidence.
+The inspector displays the original image before amount fields and the review action. Editing an amount or explicitly applying an OCR suggestion to one field reopens review; the action is disabled until amounts are valid. Closing the inspector restores focus to the receipt control. Do not present a generated sample receipt as real source evidence.
+
+An expandable OCR inspector follows the review controls. It offers Run OCR for existing receipts and keeps entered values unchanged on reruns until a per-field suggestion is applied. Original, cropped OCR input, grayscale, and binary image views support zoom and optional confidence-colored word boxes, paired with a textual confidence legend and word list. The saved cropped input is selected by default when available. Crop status shows dimensions and offset; absent crop metadata produces a visible no-crop alert, while older scans with bounds but no saved crop prompt a rerun. Word boxes align to the original using the crop offset and use local coordinates in crop views. Expandable sections expose raw text and selected or rejected amount candidates with reasons. Visible progress, errors, and manual-entry messages explain incomplete or ambiguous extraction without implying that OCR confidence confirms an amount.
 
 ### Printable Receipt
 
@@ -223,5 +225,5 @@ The PDF uses white paper, dark text, simple ruled tables, right-aligned amounts,
 
 - **Don't** introduce decorative shadows into the flat ledger and inspector.
 - **Don't** use Allura for navigation, fields, or operational headings.
-- **Don't** imply automatic extraction or captured signatures in visual copy.
+- **Don't** imply OCR amounts are confirmed before review or that generated names are captured signatures.
 - **Don't** claim reference pixel fidelity or formal composition acceptance from this source documentation.

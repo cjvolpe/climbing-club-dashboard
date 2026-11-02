@@ -949,3 +949,159 @@ footer span:first-child {
 .overview-note {
   padding: 0 18px 16px;
 }
+
+.ocr-inspector {
+  margin-top: 22px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  min-width: 0;
+}
+.ocr-inspector summary {
+  cursor: pointer;
+  padding: 8px 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.ocr-inspector-body {
+  display: grid;
+  gap: 12px;
+  padding-top: 8px;
+  min-width: 0;
+}
+.ocr-inspector h3 {
+  font-size: 14px;
+  margin: 12px 0 0;
+}
+.ocr-inspector p,
+.ocr-inspector li {
+  overflow-wrap: anywhere;
+}
+.ocr-inspector button {
+  justify-self: start;
+}
+.ocr-progress progress {
+  width: 100%;
+  accent-color: var(--blue);
+}
+.ocr-result {
+  font-weight: 600;
+}
+.ocr-error {
+  color: #f0b9a6;
+}
+.ocr-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.ocr-crop-status {
+  margin-bottom: 12px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.ocr-tools label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  min-width: 0;
+}
+.ocr-tools select {
+  width: 100%;
+  font-size: 12px;
+}
+.ocr-tools .ocr-box-toggle {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+}
+.ocr-image-scroll {
+  max-height: 420px;
+  overflow: auto;
+  background: #0a1420;
+  border: 1px solid var(--line);
+}
+.ocr-image-canvas {
+  position: relative;
+}
+.ocr-image-canvas img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+.ocr-image-canvas svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.ocr-image-canvas rect {
+  fill: transparent;
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  pointer-events: all;
+}
+.ocr-image-canvas rect:hover {
+  fill: rgb(75 156 211 / 20%);
+  stroke-width: 2px;
+}
+.ocr-high {
+  stroke: #16835e;
+}
+.ocr-medium {
+  stroke: #9a6500;
+}
+.ocr-low {
+  stroke: #c63525;
+}
+.ocr-legend {
+  margin-top: 8px;
+}
+.ocr-suggestion {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+.ocr-section {
+  min-width: 0;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+  font-size: 12px;
+}
+.ocr-text,
+.ocr-candidates,
+.ocr-word-list {
+  max-height: 320px;
+  overflow: auto;
+  margin: 8px 0;
+}
+.ocr-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 12px;
+  background: #101d2c;
+  line-height: 1.6;
+  user-select: text;
+}
+.ocr-candidates,
+.ocr-word-list {
+  list-style: none;
+  padding: 0;
+}
+.ocr-candidates li,
+.ocr-word-list li {
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  line-height: 1.6;
+}
+.ocr-candidates blockquote {
+  margin: 8px 0 0;
+  padding: 8px;
+  background: #101d2c;
+  color: var(--muted);
+}

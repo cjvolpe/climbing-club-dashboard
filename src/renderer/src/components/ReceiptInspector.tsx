@@ -3,6 +3,7 @@ import type { TreasuryWorkspace } from '../hooks/useTreasuryWorkspace'
 import { isValidReceipt } from '../lib/receipts'
 import Field from './Field'
 import Icon from './Icon'
+import OCRInspector from './OCRInspector'
 import ReceiptViewer from './ReceiptViewer'
 
 type ReceiptInspectorProps = Pick<
@@ -122,6 +123,14 @@ export default function ReceiptInspector({
       <p className="muted">
         Check both amounts against the original before marking this receipt reviewed.
       </p>
+      {(import.meta.env.DEV || import.meta.env.MODE === 'test') && (
+        <OCRInspector
+          key={`${receipt.id}-${receipt.file}`}
+          receipt={receipt}
+          image={image}
+          updateReceipt={updateReceipt}
+        />
+      )}
     </aside>
   )
 }

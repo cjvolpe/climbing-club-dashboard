@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { OCRProgress } from '../../../preload/ocr-types'
 import type { Data, Driver, Receipt, Trip } from '../../../preload/types'
 import { averageGasPrice, driverTotal, emptyData, id, isValidReceipt } from '../lib/receipts'
 
@@ -19,6 +20,7 @@ export function useTreasuryWorkspace() {
   const [viewerOpen, setViewerOpen] = useState(false)
   const receiptTrigger = useRef<HTMLButtonElement>(null)
   const [busy, setBusy] = useState(false)
+  const [importProgress, setImportProgress] = useState<OCRProgress | null>(null)
   const [message, setMessage] = useState('')
   const [saveState, setSaveState] = useState('Loading records…')
   const serial = useRef(Promise.resolve())
@@ -185,6 +187,9 @@ export function useTreasuryWorkspace() {
       return
     }
     setBusy(true)
+    const unsubscribe = window.api.onOCRProgress?.((event) => {
+      if (event.requestId === 'import') setImportProgress(event)
+    })
     try {
       const files = await window.api.importReceipts()
       const items = files.map((f) => ({ ...f, id: id(), reviewed: false }))
@@ -195,6 +200,8 @@ export function useTreasuryWorkspace() {
     } catch (e) {
       setMessage(`Receipt import failed. Check folder access and try again. ${String(e)}`)
     } finally {
+      unsubscribe?.()
+      setImportProgress(null)
       setBusy(false)
     }
   }
@@ -265,6 +272,7 @@ export function useTreasuryWorkspace() {
     setViewerOpen,
     receiptTrigger,
     busy,
+    importProgress,
     setBusy,
     message,
     setMessage,

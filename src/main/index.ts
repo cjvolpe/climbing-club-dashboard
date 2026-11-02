@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto'
-import { copyFile, mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, extname, isAbsolute, join, relative, resolve } from 'node:path'
 import { is } from '@electron-toolkit/utils'
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import type { Data, TreasuryAPI } from '../preload/types'
 import { renderPDF } from './pdf'
-import { recognizeReceipt } from './receipt-ocr'
+import { readDiagnostics, receiptPath, removeReceipt, scanReceipt } from './receipt-diagnostics'
 
 let folder: string
 const config = () => join(app.getPath('userData'), 'treasury-storage.json')
@@ -30,15 +30,7 @@ async function save(data: Data): Promise<void> {
   await rename(`${target}.tmp`, target)
   for (const file of new Set(previous ? files(previous) : [])) {
     if (retained.has(file)) continue
-    const path = resolve(folder, file)
-    const within = relative(join(folder, 'receipts'), path)
-    if (!within || within.startsWith('..') || isAbsolute(within))
-      throw new Error('Invalid receipt path')
-    try {
-      await unlink(path)
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
-    }
+    await removeReceipt(folder, file)
   }
 }
 function createWindow(): void {
@@ -131,7 +123,14 @@ app.whenReady().then(async () => {
     folder = next
     return folder
   })
-  ipcMain.handle('treasury:import', async () => {
+  ipcMain.handle('treasury:ocr-read', (_, file: string) => readDiagnostics(folder, file))
+  ipcMain.handle('treasury:ocr-scan', (event, file: string, requestId: string) =>
+    scanReceipt(folder, file, (progress) => {
+      if (!event.sender.isDestroyed())
+        event.sender.send('treasury:ocr-progress', { ...progress, file, requestId })
+    })
+  )
+  ipcMain.handle('treasury:import', async (event) => {
     const choice = await dialog.showOpenDialog({
       properties: ['openFile', 'multiSelections'],
       filters: [{ name: 'Receipt images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }]
@@ -142,27 +141,28 @@ app.whenReady().then(async () => {
     for (const source of choice.filePaths) {
       const file = join('receipts', randomUUID() + extname(source).toLowerCase())
       await copyFile(source, join(folder, file))
-      let amounts = { total: '', price: '' }
-      try {
-        amounts = await recognizeReceipt(await readFile(join(folder, file)))
-      } catch {
-        // Preserve the original and allow manual entry even when OCR fails.
-      }
+      const { total, price } = await scanReceipt(folder, file, (progress) => {
+        if (!event.sender.isDestroyed())
+          event.sender.send('treasury:ocr-progress', {
+            ...progress,
+            file,
+            requestId: 'import',
+            name: basename(source)
+          })
+      })
       receipts.push({
         name: basename(source),
         file,
-        ...amounts,
-        totalParseError: !amounts.total,
-        priceParseError: !amounts.price
+        total,
+        price,
+        totalParseError: !total,
+        priceParseError: !price
       })
     }
     return receipts
   })
   ipcMain.handle('treasury:read', async (_, file: string) => {
-    const path = resolve(folder, file)
-    const within = relative(join(folder, 'receipts'), path)
-    if (within.startsWith('..') || isAbsolute(within) || !within)
-      throw new Error('Invalid receipt path')
+    const path = receiptPath(folder, file)
     const mime =
       extname(file).toLowerCase() === '.png'
         ? 'image/png'

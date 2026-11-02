@@ -117,6 +117,13 @@ export default function TripsPage({ workspace }: TripsPageProps) {
           New trip
         </button>
       </div>
+      {workspace.importProgress && (
+        <div className="import-bar" role="status">
+          Reading {workspace.importProgress.name || 'receipt'} · {workspace.importProgress.status}
+          {' · '}
+          {Math.round(workspace.importProgress.progress * 100)}%
+        </div>
+      )}
       {editor && (
         <TripForm setEditor={setEditor} draft={draft} setDraft={setDraft} createTrip={createTrip} />
       )}
