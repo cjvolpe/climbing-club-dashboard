@@ -11,8 +11,9 @@ export const formatMoney = (n: number) =>
 export const driverTotal = (d: Driver) =>
   d.receipts.reduce((n, r) => n + Math.round((Number(r.total) || 0) * 100), 0) / 100
 
-export const averageGasPrice = (receipts: Receipt[]) => {
+export const averageGasPrice = (receipts: Receipt[], excludeDiesel = false) => {
   const prices = receipts
+    .filter((r) => !excludeDiesel || !r.diesel)
     .filter((r) => !r.priceParseError && /^\d+(\.\d{1,3})?$/.test(r.price))
     .map((r) => Number(r.price))
     .filter((price) => Number.isFinite(price) && price > 0)

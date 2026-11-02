@@ -89,10 +89,22 @@ function amountCandidates(line: ReceiptLine, label: string, start: number): Rece
     const value = match[0].replace(/[\s$,]/g, '')
     const hasThreeDecimals = /\.\d{3}$/.test(value)
     const candidateLabel = suffix ? suffix[1] : hasThreeDecimals ? '' : label
-    const field = suffix || hasThreeDecimals ? 'price' : label ? (pricePattern.test(label) ? 'price' : 'total') : null
+    const field =
+      suffix || hasThreeDecimals
+        ? 'price'
+        : label
+          ? pricePattern.test(label)
+            ? 'price'
+            : 'total'
+          : null
     // OCR confidence is word-level; mixed symbol/digit tokens share their word's score.
     const digitConfidence = confidenceForRange(line, offset, offset + match[0].length, /\d/)
-    const currencySymbolConfidence = confidenceForRange(line, offset, offset + match[0].length, /\$/)
+    const currencySymbolConfidence = confidenceForRange(
+      line,
+      offset,
+      offset + match[0].length,
+      /\$/
+    )
     let reason = ''
     if (!field) reason = 'No supported total or price-per-gallon label on this row.'
     else if (!suffix && !hasThreeDecimals && offset + match[0].search(/\S/) < start)
@@ -115,8 +127,12 @@ function amountCandidates(line: ReceiptLine, label: string, start: number): Rece
       source: line.text,
       label: candidateLabel,
       // Digit confidence only adds support; explicit total labels retain priority.
-      rank: (field === 'total' && fuelItemPattern.test(label) ? 0.25 :
-        field === 'total' && /grand|amount\s+paid/i.test(label) ? 2 : 1) +
+      rank:
+        (field === 'total' && fuelItemPattern.test(label)
+          ? 0.25
+          : field === 'total' && /grand|amount\s+paid/i.test(label)
+            ? 2
+            : 1) +
         Math.max(0, Math.min(100, digitConfidence ?? 0)) / 200 -
         // Unusually high fuel prices remain eligible, but lose priority to plausible prices.
         (field === 'price' && Number(value) > 7.5 ? 0.75 : 0),
@@ -176,6 +192,7 @@ export function analyzeReceipt(text: string, words: OCRWord[] = []): ReceiptAnal
     candidates.push(...found.map((candidate) => ({ ...candidate, id: `${index}-${candidate.id}` })))
   }
   const analysis: ReceiptAnalysis = {
+    diesel: fuelItemPattern.test(text) || words.some((word) => fuelItemPattern.test(word.text)),
     total: '',
     price: '',
     candidates,
@@ -198,9 +215,10 @@ export function analyzeReceipt(text: string, words: OCRWord[] = []): ReceiptAnal
       else if (conflict) candidate.reason = 'Conflicting labelled amounts; verify manually.'
       else {
         candidate.status = 'selected'
-        candidate.reason = candidate.field === 'price' && /\.\d{3}$/.test(candidate.value)
-          ? 'Unique positive three-decimal amount indicates the price per gallon.'
-          : 'Unique positive amount beside or directly below a supported label.'
+        candidate.reason =
+          candidate.field === 'price' && /\.\d{3}$/.test(candidate.value)
+            ? 'Unique positive three-decimal amount indicates the price per gallon.'
+            : 'Unique positive amount beside or directly below a supported label.'
       }
     }
     analysis.explanations[field] = analysis[field]

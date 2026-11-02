@@ -119,8 +119,8 @@ export default function TripsPage({ workspace }: TripsPageProps) {
       </div>
       {workspace.importProgress && (
         <div className="import-bar" role="status">
-          Reading {workspace.importProgress.name || 'receipt'} · {workspace.importProgress.status}
-          {' · '}
+          Reading {workspace.importProgress.name || 'receipt'} Â· {workspace.importProgress.status}
+          {' Â· '}
           {Math.round(workspace.importProgress.progress * 100)}%
         </div>
       )}
@@ -137,6 +137,8 @@ export default function TripsPage({ workspace }: TripsPageProps) {
           setEditor={setEditor}
           setPreview={setPreview}
           busy={busy}
+          setExcludeDiesel={workspace.setExcludeDiesel}
+          excludeDiesel={workspace.excludeDiesel}
           overallAverage={overallAverage}
           overallTotal={overallTotal}
           deleteTrip={deleteTrip}
@@ -194,6 +196,8 @@ export default function TripsPage({ workspace }: TripsPageProps) {
                 busy={busy}
                 trip={trip}
                 receipts={receipts}
+                excludeDiesel={workspace.excludeDiesel}
+                setExcludeDiesel={workspace.setExcludeDiesel}
                 averagePrice={averagePrice}
                 reviewed={reviewed}
                 updateTrip={updateTrip}

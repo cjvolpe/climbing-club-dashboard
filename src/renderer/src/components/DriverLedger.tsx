@@ -18,6 +18,8 @@ type DriverLedgerProps = Pick<
   | 'trip'
   | 'receipts'
   | 'averagePrice'
+  | 'excludeDiesel'
+  | 'setExcludeDiesel'
   | 'reviewed'
   | 'updateTrip'
   | 'updateDriver'
@@ -39,6 +41,8 @@ export default function DriverLedger({
   trip,
   receipts,
   averagePrice,
+  excludeDiesel,
+  setExcludeDiesel,
   reviewed,
   updateTrip,
   updateDriver,
@@ -62,6 +66,14 @@ export default function DriverLedger({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
+          <label title="Applies to all trips">
+            <input
+              type="checkbox"
+              checked={excludeDiesel}
+              onChange={(e) => setExcludeDiesel(e.target.checked)}
+            />
+            Exclude diesel from average
+          </label>
           <label>
             <input type="checkbox" checked={filter} onChange={(e) => setFilter(e.target.checked)} />
             Needs review
@@ -136,7 +148,7 @@ export default function DriverLedger({
         </span>
         <div>
           <span className="summary-amount">
-            <span>Avg cost / gal</span>
+            <span>Avg cost / gal{excludeDiesel ? ' (excludes diesel)' : ''}</span>
             <strong>{averagePrice === null ? '—' : `$${averagePrice.toFixed(3)}`}</strong>
           </span>
           <span className="summary-amount">

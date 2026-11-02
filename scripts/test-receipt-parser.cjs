@@ -25,8 +25,8 @@ for (const [text, expected] of [
   ['7.500\n7.501', { total: '', price: '7.500' }],
   ['7.501', { total: '', price: '7.501' }],
   ['TOTAL 42.50\n3.459\n12.345', { total: '42.50', price: '3.459' }],
-  ['DIESEL 2°CR #06 7 6616 42.59', { total: '42.59', price: '' }],
-  ['DIESEL 2°CR #06 7 3.459 42.59', { total: '42.59', price: '3.459' }],
+  ['DIESEL 2Â°CR #06 7 6616 42.59', { total: '42.59', price: '' }],
+  ['DIESEL 2Â°CR #06 7 3.459 42.59', { total: '42.59', price: '3.459' }],
   ['DIESEL 42.59\nTOTAL 45.00', { total: '45.00', price: '' }],
   ['DIESEL PRICE/GAL 3.45', { total: '', price: '' }],
   ['DIESEL\n42.59', { total: '', price: '' }],
@@ -42,7 +42,10 @@ for (const [text, expected] of [
   ['TOTAL 40.00\nGRAND TOTAL 42.50\nUNIT PRICE 3.459', { total: '42.50', price: '3.459' }],
   ['TOTAL 42.50\nTOTAL 43.50\nPPG 3.459', { total: '', price: '3.459' }],
   ['TOTAL 42.50\nPPG 3.459\nPPG 3.559', { total: '42.50', price: '' }],
-  ['TOTAL GALLONS 12.345\nSUBTOTAL 40.00\nCARD 123456789\nCHANGE 2.00', { total: '', price: '12.345' }],
+  [
+    'TOTAL GALLONS 12.345\nSUBTOTAL 40.00\nCARD 123456789\nCHANGE 2.00',
+    { total: '', price: '12.345' }
+  ],
   ['TOTAL 42.50\nPRICE/GAL 0.00', { total: '42.50', price: '' }],
   ['TOTAL -42.50\nPRICE/GAL 3.459', { total: '', price: '3.459' }],
   ['unreadable', { total: '', price: '' }]
@@ -116,7 +119,9 @@ assert.equal(mixedToken.total, '42.50', 'Low-confidence mixed tokens remain elig
 assert.equal(mixedToken.candidates[0].digitConfidence, 30)
 assert.equal(mixedToken.candidates[0].currencySymbolConfidence, 30)
 const weakDigits = analyzeReceipt('', [
-  word('TOTAL', 10, 10), word('$', 200, 10), word('42.50', 220, 10, 30)
+  word('TOTAL', 10, 10),
+  word('$', 200, 10),
+  word('42.50', 220, 10, 30)
 ])
 assert.equal(weakDigits.total, '42.50', 'Weak digits do not reject a valid amount')
 assert.equal(
@@ -144,21 +149,52 @@ console.log(
 )
 
 for (const confidence of [0, 1, 49, 50, 100]) {
-  const result = analyzeReceipt('', [
-    word('TOTAL', 10, 10), word('42.50', 220, 10, confidence)
-  ])
+  const result = analyzeReceipt('', [word('TOTAL', 10, 10), word('42.50', 220, 10, confidence)])
   assert.equal(result.total, '42.50', `Digit confidence ${confidence} never rejects a valid amount`)
   assert.ok(result.candidates[0].rank >= 1, 'Digit confidence never subtracts from the base rank')
 }
 const supported = analyzeReceipt('', [
-  word('TOTAL', 10, 10), word('42.50', 220, 10, 30),
-  word('TOTAL', 10, 50), word('43.50', 220, 50, 95)
+  word('TOTAL', 10, 10),
+  word('42.50', 220, 10, 30),
+  word('TOTAL', 10, 50),
+  word('43.50', 220, 50, 95)
 ])
-assert.equal(supported.total, '43.50', 'Stronger digit support improves selection among equal labels')
+assert.equal(
+  supported.total,
+  '43.50',
+  'Stronger digit support improves selection among equal labels'
+)
 assert.ok(supported.candidates[1].rank > supported.candidates[0].rank)
 const explicit = analyzeReceipt('', [
-  word('TOTAL', 10, 10), word('42.50', 220, 10, 100),
-  word('GRAND TOTAL', 10, 50), word('43.50', 220, 50, 0)
+  word('TOTAL', 10, 10),
+  word('42.50', 220, 10, 100),
+  word('GRAND TOTAL', 10, 50),
+  word('43.50', 220, 50, 0)
 ])
 assert.equal(explicit.total, '43.50', 'Explicit label priority outweighs digit confidence')
 console.log('PASS: digit confidence adds support without a rejection cutoff')
+
+assert.equal(analyzeReceipt('ULTRA DIESEL 42.50').diesel, true)
+assert.equal(analyzeReceipt('Fuel: diesel.').diesel, true)
+assert.equal(analyzeReceipt('Regular unleaded').diesel, false)
+assert.equal(analyzeReceipt('', [word('Diesel', 10, 10)]).diesel, true)
+const receiptsModule = new Module('receipts')
+receiptsModule._compile(
+  ts.transpileModule(fs.readFileSync('src/renderer/src/lib/receipts.ts', 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 }
+  }).outputText,
+  'receipts.cjs'
+)
+const { averageGasPrice, driverTotal } = receiptsModule.exports
+const fuelReceipts = [
+  { price: '3.000', total: '30.00' },
+  { price: '5.000', total: '50.00', diesel: true },
+  { price: 'invalid', total: '', diesel: false },
+  { price: '9.000', total: '', priceParseError: true }
+]
+assert.equal(averageGasPrice(fuelReceipts), 4)
+assert.equal(averageGasPrice(fuelReceipts, true), 3)
+assert.equal(averageGasPrice([fuelReceipts[1]], true), null)
+assert.equal(averageGasPrice([]), null)
+assert.equal(driverTotal({ receipts: fuelReceipts }), 80)
+console.log('PASS: diesel detection, optional exclusion, empty averages, unchanged totals')

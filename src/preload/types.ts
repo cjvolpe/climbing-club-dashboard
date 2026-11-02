@@ -8,6 +8,7 @@ export interface Receipt {
   price: string
   totalParseError?: boolean
   priceParseError?: boolean
+  diesel?: boolean
   reviewed: boolean
 }
 export interface Driver {
@@ -23,6 +24,8 @@ export interface Trip {
   end: string
   location: string
   drivers: Driver[]
+  /** Legacy per-trip preference; used when loading older workspaces. */
+  excludeDiesel?: boolean
   number: string
 }
 export interface Profile {
@@ -34,6 +37,7 @@ export interface Profile {
   account: string
 }
 export interface Data {
+  excludeDiesel?: boolean
   trips: Trip[]
   profile: Profile
 }
@@ -45,7 +49,10 @@ export interface TreasuryAPI {
   confirmDeleteTrip(name: string): Promise<boolean>
   chooseFolder(): Promise<string | null>
   importReceipts(): Promise<
-    Pick<Receipt, 'name' | 'file' | 'total' | 'price' | 'totalParseError' | 'priceParseError'>[]
+    Pick<
+      Receipt,
+      'name' | 'file' | 'total' | 'price' | 'totalParseError' | 'priceParseError' | 'diesel'
+    >[]
   >
   readReceipt(file: string): Promise<string>
   readOCR(file: string): Promise<OCRDiagnostics | null>

@@ -256,6 +256,7 @@ main {
 }
 .filters {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 13px;
 }
@@ -1112,4 +1113,10 @@ footer span:first-child {
   padding: 8px;
   background: #101d2c;
   color: var(--muted);
+}
+
+.fuel-average-note {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
 }

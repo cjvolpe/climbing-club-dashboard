@@ -75,8 +75,7 @@ app.whenReady().then(async () => {
       cancelId: 0,
       title: 'Remove receipt',
       message: `Remove ${name} from this driver?`,
-      detail:
-        'This permanently removes the receipt data and stored image. This cannot be undone.',
+      detail: 'This permanently removes the receipt data and stored image. This cannot be undone.',
       noLink: true
     }
     const result = win
@@ -159,7 +158,7 @@ app.whenReady().then(async () => {
     for (const source of choice.filePaths) {
       const file = join('receipts', randomUUID() + extname(source).toLowerCase())
       await copyFile(source, join(folder, file))
-      const { total, price } = await scanReceipt(folder, file, (progress) => {
+      const { total, price, diesel } = await scanReceipt(folder, file, (progress) => {
         if (!event.sender.isDestroyed())
           event.sender.send('treasury:ocr-progress', {
             ...progress,
@@ -173,6 +172,7 @@ app.whenReady().then(async () => {
         file,
         total,
         price,
+        diesel,
         totalParseError: !total,
         priceParseError: !price
       })

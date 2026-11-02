@@ -28,9 +28,13 @@ export function useTreasuryWorkspace() {
   const driver = trip?.drivers.find((d) => d.receipts.some((r) => r.id === selected))
   const receipt = driver?.receipts.find((r) => r.id === selected)
   const receipts = trip?.drivers.flatMap((d) => d.receipts) || []
-  const averagePrice = averageGasPrice(receipts)
+  const excludeDiesel = data.excludeDiesel ?? data.trips.some((t) => t.excludeDiesel)
+  const averagePrice = averageGasPrice(receipts, excludeDiesel)
   const allReceipts = data.trips.flatMap((t) => t.drivers.flatMap((d) => d.receipts))
-  const overallAverage = averageGasPrice(allReceipts)
+  const overallAverage = averageGasPrice(allReceipts, excludeDiesel)
+  function setExcludeDiesel(value: boolean) {
+    setData((current) => ({ ...current, excludeDiesel: value }))
+  }
   const overallTotal =
     data.trips.reduce(
       (total, t) =>
@@ -310,6 +314,8 @@ export function useTreasuryWorkspace() {
     receipt,
     receipts,
     averagePrice,
+    excludeDiesel,
+    setExcludeDiesel,
     overallAverage,
     overallTotal,
     reviewed,

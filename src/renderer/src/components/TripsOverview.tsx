@@ -19,6 +19,8 @@ type TripsOverviewProps = Pick<
   | 'setPreview'
   | 'busy'
   | 'overallAverage'
+  | 'excludeDiesel'
+  | 'setExcludeDiesel'
   | 'overallTotal'
   | 'deleteTrip'
 >
@@ -33,11 +35,26 @@ export default function TripsOverview({
   setPreview,
   busy,
   overallAverage,
+  excludeDiesel,
+  setExcludeDiesel,
   overallTotal,
   deleteTrip
 }: TripsOverviewProps) {
   return (
     <section className="ledger trips-overview" aria-label="Trips overview">
+      <div className="ledger-tools">
+        <strong>All trips</strong>
+        <div className="filters">
+          <label title="Applies to all trips">
+            <input
+              type="checkbox"
+              checked={excludeDiesel}
+              onChange={(e) => setExcludeDiesel(e.target.checked)}
+            />
+            Exclude diesel from average
+          </label>
+        </div>
+      </div>
       <div className="table-wrap">
         <table>
           <thead>
@@ -81,7 +98,13 @@ export default function TripsOverview({
                   {formatMoney(t.drivers.reduce((total, d) => total + driverTotal(d), 0))}
                 </td>
                 <td className="number">
-                  {formatGasPrice(averageGasPrice(t.drivers.flatMap((d) => d.receipts)))}
+                  {formatGasPrice(
+                    averageGasPrice(
+                      t.drivers.flatMap((d) => d.receipts),
+                      excludeDiesel
+                    )
+                  )}
+                  {excludeDiesel && <small className="fuel-average-note">Excludes diesel</small>}
                 </td>
                 <td>
                   <button
@@ -117,6 +140,7 @@ export default function TripsOverview({
       </div>
       <p className="overview-note muted">
         Average of recorded receipt prices. Missing or invalid prices are excluded.
+        {excludeDiesel && ' Diesel is excluded from averages across all trips.'}
       </p>
     </section>
   )

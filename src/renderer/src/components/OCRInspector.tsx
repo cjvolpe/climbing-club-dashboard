@@ -28,7 +28,11 @@ export default function OCRInspector({
       window.api
         .readOCR(receipt.file)
         .then((result) => {
-          if (active.current) setDiagnostics(result)
+          if (active.current) {
+            setDiagnostics(result)
+            if (result && (result.diesel || /\bdiesel\b/i.test(result.text)))
+              updateReceipt({ diesel: true })
+          }
         })
         .catch((cause) => {
           if (active.current) setError(`Could not load OCR details. ${String(cause)}`)
@@ -51,7 +55,11 @@ export default function OCRInspector({
     setProgress({ status: 'Starting OCR', progress: 0 })
     try {
       const result = await window.api.scanReceipt(receipt.file, request.current)
-      if (active.current) setDiagnostics(result)
+      if (active.current) {
+        setDiagnostics(result)
+        if (result.status === 'recognized')
+          updateReceipt({ diesel: result.diesel || /\bdiesel\b/i.test(result.text) })
+      }
     } catch (cause) {
       if (active.current) setError(`Could not scan or save OCR details. ${String(cause)}`)
     } finally {

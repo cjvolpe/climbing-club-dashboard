@@ -96,6 +96,7 @@ export async function recognizeReceipt(
       )
       const fallbackWords = extractWords(second.data)
       const fallback = analyzeReceipt(second.data.text, fallbackWords)
+      analysis.diesel = analysis.diesel || fallback.diesel
       for (const field of ['total', 'price'] as const) {
         if (analysis[field]) continue
         analysis[field] = fallback[field]

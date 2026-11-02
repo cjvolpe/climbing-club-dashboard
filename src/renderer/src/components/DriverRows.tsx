@@ -100,12 +100,15 @@ export default function DriverRows({
                   <Icon name="pdf" />
                   <span>
                     {r.name}
-                    <small>Receipt {i + 1}</small>
+                    <small>
+                      Receipt {i + 1}
+                      {r.diesel ? ' / Diesel' : ''}
+                    </small>
                   </span>
                 </button>
               </td>
-              <td className="number">{r.total ? formatMoney(Number(r.total)) : '—'}</td>
-              <td className="number">{r.price ? `$${Number(r.price).toFixed(3)}` : '—'}</td>
+              <td className="number">{r.total ? formatMoney(Number(r.total)) : 'â€”'}</td>
+              <td className="number">{r.price ? `$${Number(r.price).toFixed(3)}` : 'â€”'}</td>
               <td>
                 <span className={`status ${r.reviewed ? 'reviewed' : ''}`}>
                   {r.reviewed ? 'Reviewed' : 'Needs review'}

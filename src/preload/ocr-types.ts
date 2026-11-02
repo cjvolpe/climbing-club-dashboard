@@ -29,6 +29,7 @@ export interface ReceiptCandidate {
 }
 
 export interface ReceiptAnalysis {
+  diesel?: boolean
   total: string
   price: string
   candidates: ReceiptCandidate[]
