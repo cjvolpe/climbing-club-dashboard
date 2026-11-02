@@ -238,6 +238,19 @@ main {
   border-radius: 6px;
   overflow: hidden;
 }
+.workspace > .ledger {
+  display: flex;
+  flex-direction: column;
+  max-height: 70dvh;
+}
+.workspace > .ledger > :not(.table-wrap) {
+  flex-shrink: 0;
+}
+.workspace > .ledger > .table-wrap {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
 .ledger-tools {
   padding: 17px 16px;
   display: flex;
