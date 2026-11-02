@@ -59,8 +59,8 @@ export default function App() {
             </button>
           ))}
           <div className="sidebar-note">
-            A clear record.
-            <br />A smoother handoff.
+            Climb Time,
+            <br />Grind Time
           </div>
         </nav>
         <main>
@@ -109,7 +109,7 @@ export default function App() {
           Offline mode
         </span>
         <span>{saveState}</span>
-        <span className="footer-right">Your receipts. Your records. On your drive.</span>
+        <span className="footer-right">UNC Chapel Hill Climbing Club. Stay Sendy</span>
       </footer>
     </div>
   )
